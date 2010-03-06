@@ -3,44 +3,13 @@ require 'rubygems'
 require 'rack/logger'
 require 'sinatra'
 require 'twitter_oauth'
-require 'dm-core'
-require 'dm-timestamps'
+require 'mutetweets/models'
 
 configure do
   set :sessions, true
   @@config = YAML.load_file("config.yml") rescue nil || {}
   LOGGER = Logger.new("../logs/sinatra.log") 
 end
-
-#
-# database
-#
-DataMapper.setup(:default, @@config['database'])
-
-class User
-  include DataMapper::Resource
-  
-  has n, :mutes
-  
-  property :id, Serial
-  property :screen_name, String, :nullable => false, :unique_index => true
-  property :access_token, String, :nullable => false
-  property :secret_token, String, :nullable => false
-  property :created_at, DateTime, :nullable => false, :index => true
-end
-
-class Mute
-  include DataMapper::Resource
-  
-  belongs_to :user
-  
-  property :id, Serial
-  property :screen_name, String, :nullable => false, :index => true
-  property :length, Integer, :nullable => false
-  property :created_at, DateTime, :nullable => false, :index => true
-end
-
-DataMapper.auto_migrate!
 
 #
 # app
@@ -112,15 +81,10 @@ end
 
 # useful for site monitoring
 get '/ping' do 
-  'pong'
 end
 
 helpers do
   def logger
     LOGGER
-  end
-  
-  def partial(name, options={})
-    erb("_#{name.to_s}".to_sym, options.merge(:layout => false))
   end
 end
