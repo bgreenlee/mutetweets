@@ -4,16 +4,16 @@ require 'rack/logger'
 require 'sinatra'
 require 'twitter_oauth'
 require 'mutetweets/models'
+require 'mutetweets/helpers'
 
 configure do
   set :sessions, true
   @@config = YAML.load_file("config.yml") rescue nil || {}
-  LOGGER = Logger.new("../logs/sinatra.log") 
+  LOGGER = Logger.new("../logs/sinatra.log")
+  
+  DataMapper.setup(:default, @@config['database'])
+  DataMapper.auto_migrate!
 end
-
-#
-# app
-#
 
 before do
   next if request.path_info =~ /ping$/
@@ -24,7 +24,6 @@ before do
     :token => session[:access_token],
     :secret => session[:secret_token]
   )
-  @rate_limit_status = @client.rate_limit_status
 end
 
 get '/' do
@@ -79,12 +78,6 @@ get '/disconnect' do
   redirect '/'
 end
 
-# useful for site monitoring
+# for site monitoring
 get '/ping' do 
-end
-
-helpers do
-  def logger
-    LOGGER
-  end
 end

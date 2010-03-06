@@ -1,8 +1,6 @@
 require 'dm-core'
 require 'dm-timestamps'
 
-DataMapper.setup(:default, @@config['database'])
-
 class User
   include DataMapper::Resource
   
@@ -25,5 +23,3 @@ class Mute
   property :length, Integer, :nullable => false
   property :created_at, DateTime, :nullable => false, :index => true
 end
-
-DataMapper.auto_migrate!
