@@ -1,46 +1,31 @@
 <html>
 <head>
-    <title>Sinitter - Twitter OAuth Demo Application</title>
-    <link href="/main.css" media="screen" rel="Stylesheet" type="text/css" />
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/> 
+  <title>Mute Tweets</title>
+  <link href="/css/main.css" media="screen" rel="Stylesheet" type="text/css" />
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/> 
 </head>
 
 <body>
 
 <div id="content">
-    <div id="header">
-        <div>
-            <h1>Sinitter - Twitter OAuth Demo Application</h1>
-        </div>
-        <br clear="all"/>
-    </div>
-    
-    <div id="nav" style="float:right">
-        <p>
-            <a href='/'>Home</a> |
-            <a href='/search'>Search</a>
-            <% if @user %>
-                |
-                <a href='/timeline'>Timeline</a> |
-                <a href='/mentions'>Mentions</a> |
-                <a href='/retweets'>Retweets of me</a> |
-                <a href='/retweeted'>Retweets by me</a> |
-                <a href='/messages'>Direct Messages</a> |
-                <a href='/disconnect'>Logout</a>
-            <% end %>
-        </p>
+  <div id="header">
+    <div>
+      <div id="login-status">
+        <% if @user %>
+        Welcome, <%= @user %>. <a href='/disconnect'>[logout]</a>
+        <% else %>
+        <a href="/connect"><img src="/images/sign_in_with_twitter.gif"/></a>
+        <% end %>
+      </div>            
+      <h1>Mute Tweets</h1>
     </div>
     <br clear="all"/>
+  </div>
+
+  <%= yield %>
     
-    <%= yield %>
-    
-    <div id="footer">
-        <br/>
-        <small>
-            Hosted free on <a href="http://heroku.com/">Heroku</a>. API calls remaining: <%= @rate_limit_status['remaining_hits'] %>/<%= @rate_limit_status['hourly_limit'] %> per hour
-        </small>
-    </div>
-    
+  <div id="footer">
+  </div>    
 </div>
 
 </body>

@@ -4,6 +4,7 @@ require 'rack/logger'
 require 'sinatra'
 require 'twitter_oauth'
 require 'dm-core'
+require 'dm-timestamps'
 
 configure do
   set :sessions, true
@@ -22,9 +23,10 @@ class User
   has n, :mutes
   
   property :id, Serial
-  property :screen_name, String, :nullable => false
+  property :screen_name, String, :nullable => false, :unique_index => true
   property :access_token, String, :nullable => false
   property :secret_token, String, :nullable => false
+  property :created_at, DateTime, :nullable => false, :index => true
 end
 
 class Mute
@@ -33,8 +35,9 @@ class Mute
   belongs_to :user
   
   property :id, Serial
-  property :length, Integer
-  property :created_at, DateTime
+  property :screen_name, String, :nullable => false, :index => true
+  property :length, Integer, :nullable => false
+  property :created_at, DateTime, :nullable => false, :index => true
 end
 
 DataMapper.auto_migrate!
@@ -56,47 +59,7 @@ before do
 end
 
 get '/' do
-  redirect '/timeline' if @user
-  @trends = @client.current_trends
-  @tweets = @client.public_timeline
   erb :home
-end
-
-get '/timeline' do
-  @tweets = @client.friends_timeline
-  erb :timeline
-end
-
-get '/mentions' do
-  @tweets = @client.mentions
-  erb:timeline
-end
-
-get '/retweets' do
-  @tweets = @client.retweets_of_me
-  erb:timeline
-end
-
-get '/retweeted' do
-  @tweets = @client.retweeted_by_me
-  erb:timeline
-end
-
-post '/update' do
-  @client.update(params[:update])
-  redirect '/timeline'
-end
-
-get '/messages' do
-  @sent = @client.sent_messages
-  @received = @client.messages
-  erb :messages
-end
-
-get '/search' do
-  params[:q] ||= 'mutetweets OR twitter_oauth'
-  @search = @client.search(params[:q], :page => params[:page], :per_page => params[:per_page])
-  erb :search
 end
 
 # store the request tokens and send to Twitter
@@ -132,11 +95,10 @@ get '/auth' do
                     
       session[:access_token] = @access_token.token
       session[:secret_token] = @access_token.secret
-      session[:user] = true
-      redirect '/timeline'
-    else
-      redirect '/'
+      session[:user] = @client.info['screen_name']
   end
+  
+  redirect '/'
 end
 
 get '/disconnect' do

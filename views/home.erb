@@ -1,16 +1,25 @@
-<div id="connect_button">
-    <a href="/connect"><img src="sign_in_with_twitter.gif"/></a>
-</div>
-<h2>About</h2>
-<p>
-    Sinitter is an application to demonstrate the integration of Twitter OAuth with <a href="http://www.sinatrarb.com/">sinatra</a> and
-    also serves as a live test for the <a href="http://github.com/moomerman/twitter_oauth/tree/master">twitter_oauth</a> Ruby gem.
-</p>
-<p>The <a href="http://github.com/moomerman/sinitter/tree/master">source code</a> for this application is available on github.</p>
-<p>Created and maintained by <a href="http://moocode.com/foo">Richard Taylor</a> (<a href="http://twitter.com/moomerman">@moomerman</a>). Any comments/suggestions welcome</p>
+<p>Mute Tweets allows you to temporarily unfollow someone who's being too noisy, refollowing them after a given period of time.</p>
 
-<h2>Current Trends</h2>
-<%= @trends['trends'].to_a.first.last.collect{|x| "<a href='/search?q=#{URI.encode(x['query'])}'>#{x['name']}</a>"}.join(', ') %>
+<h2>Usage</h2>
+<p>First, follow <a href="http://twitter.com/mutetweets">mutetweets</a> on Twitter. Mute Tweets will follow you back and send you a direct message with a link that will let you give it access to your Twitter account so it can unfollow and refollow people on your behalf.</p>
 
-<h2>Public Timeline</h2>
-<%= partial('timeline', :locals => {:tweets => @tweets}) %>
+<p>Now, to mute someone, just tweet:</p>
+  
+<p><code>
+@mutetweets <em>&lt;@noisyperson&gt; &lt;length of time&gt;</em> 
+</code><p>
+  
+<p><em><code>&lt;length of time&gt;</code></em> follows the format <em><code>&lt;number&gt;&lt;unit&gt;</code></em>, where <em><code>&lt;unit&gt;</code></em> is one of "s" (seconds), "m" (minutes), "h" (hours), or "d" (days).</p>
+
+<h3>Example</h3>
+
+<table id="examples">
+<tr>
+  <td class="example">@mutetweets @gruber 3h</td>
+  <td class="desc"># mute @gruber for 3 hours (until the baseball game is over)</td>
+</tr>
+<tr>
+  <td class="example">d mutetweets @gruber 3h</td>
+  <td class="desc"># send a direct message instead</td>
+</tr>
+</table>
