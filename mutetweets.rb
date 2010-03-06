@@ -1,11 +1,19 @@
 #!/usr/bin/env ruby
 require 'rubygems'
+require 'rack/logger'
 require 'sinatra'
 require 'twitter_oauth'
 
 configure do
   set :sessions, true
   @@config = YAML.load_file("config.yml") rescue nil || {}
+  LOGGER = Logger.new("../logs/sinatra.log") 
+end
+
+helpers do
+  def logger
+    LOGGER
+  end
 end
 
 before do
