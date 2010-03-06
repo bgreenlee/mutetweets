@@ -3,6 +3,7 @@ require 'rubygems'
 require 'rack/logger'
 require 'sinatra'
 require 'twitter_oauth'
+require 'dm-core'
 
 configure do
   set :sessions, true
@@ -10,18 +11,44 @@ configure do
   LOGGER = Logger.new("../logs/sinatra.log") 
 end
 
-helpers do
-  def logger
-    LOGGER
-  end
+#
+# database
+#
+DataMapper.setup(:default, @@config['database'])
+
+class User
+  include DataMapper::Resource
+  
+  has n, :mutes
+  
+  property :id, Serial
+  property :screen_name, String, :nullable => false
+  property :access_token, String, :nullable => false
+  property :secret_token, String, :nullable => false
 end
+
+class Mute
+  include DataMapper::Resource
+  
+  belongs_to :user
+  
+  property :id, Serial
+  property :length, Integer
+  property :created_at, DateTime
+end
+
+DataMapper.auto_migrate!
+
+#
+# app
+#
 
 before do
   next if request.path_info =~ /ping$/
   @user = session[:user]
   @client = TwitterOAuth::Client.new(
-    :consumer_key => ENV['CONSUMER_KEY'] || @@config['consumer_key'],
-    :consumer_secret => ENV['CONSUMER_SECRET'] || @@config['consumer_secret'],
+    :consumer_key => @@config['consumer_key'],
+    :consumer_secret => @@config['consumer_secret'],
     :token => session[:access_token],
     :secret => session[:secret_token]
   )
@@ -75,7 +102,7 @@ end
 # store the request tokens and send to Twitter
 get '/connect' do
   request_token = @client.request_token(
-    :oauth_callback => ENV['CALLBACK_URL'] || @@config['callback_url']
+    :oauth_callback => @@config['callback_url']
   )
   session[:request_token] = request_token.token
   session[:request_token_secret] = request_token.secret
@@ -97,8 +124,12 @@ get '/auth' do
   end
   
   if @client.authorized?
-      # Storing the access tokens so we don't have to go back to Twitter again
-      # in this session.  In a larger app you would probably persist these details somewhere.
+      # find or create user
+      user = User.first(:screen_name => @client.info['screen_name']) || 
+             User.create(:screen_name => @client.info['screen_name'], 
+                         :access_token => @access_token.token,
+                         :secret_token => @access_token.secret)
+                    
       session[:access_token] = @access_token.token
       session[:secret_token] = @access_token.secret
       session[:user] = true
@@ -122,7 +153,11 @@ get '/ping' do
   'pong'
 end
 
-helpers do 
+helpers do
+  def logger
+    LOGGER
+  end
+  
   def partial(name, options={})
     erb("_#{name.to_s}".to_sym, options.merge(:layout => false))
   end
