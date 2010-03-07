@@ -12,7 +12,7 @@ configure do
   LOGGER = Logger.new("../logs/sinatra.log")
   
   DataMapper.setup(:default, @@config['database'])
-  DataMapper.auto_migrate!
+  DataMapper.auto_upgrade!
 end
 
 before do
@@ -60,7 +60,13 @@ get '/auth' do
              User.create(:screen_name => @client.info['screen_name'], 
                          :access_token => @access_token.token,
                          :secret_token => @access_token.secret)
-                    
+
+      if !user.registered?
+        user.access_token = @access_token.token
+        user.secret_token = @access_token.secret
+        user.save
+      end
+      
       session[:access_token] = @access_token.token
       session[:secret_token] = @access_token.secret
       session[:user] = @client.info['screen_name']

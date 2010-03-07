@@ -6,7 +6,7 @@ require 'rubygems'
 require 'sinatra'
 require 'app'
 
-set :environment, ENV['RACK_ENV'].to_sym
+set :environment, :production
 set :root, root_dir
 set :app_file, File.join(root_dir, "app.rb")
 set :raise_errors, true # disable when we're ready for production

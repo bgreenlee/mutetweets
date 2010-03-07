@@ -12,7 +12,7 @@
     <div>
       <div id="login-status">
         <% if @user %>
-        Welcome, <%= @user %>. <a href='/disconnect'>[logout]</a>
+        Welcome, <strong><%= @user %></strong>! <a href='/disconnect'>[logout]</a>
         <% else %>
         <a href="/connect"><img src="/images/sign_in_with_twitter.gif"/></a>
         <% end %>
