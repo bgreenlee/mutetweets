@@ -2,8 +2,8 @@ class TweetStreamProcessor
   MAX_FETCH = 200 # max number of messages to fetch from Twitter
   MAX_RETRIES = 3 # number of times to retry in the case of an error
   MESSAGE = {
-    :welcome => "Welcome to Mute Tweets! Go to http://mutetweets.com/start to get started.",
-    :unregistered => "Sorry, I don't have you registered yet. Go to http://mutetweets.com/start to get started."
+    :welcome => "Welcome to Mute Tweets! Go to http://mutetweets.com to get started.",
+    :unregistered => "Sorry, I don't have you registered yet. Go to http://mutetweets.com to get started."
   }
 
   def initialize(client, verbose = false)
