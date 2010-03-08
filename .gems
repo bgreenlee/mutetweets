@@ -1,4 +1,5 @@
 twitter_oauth --version 0.3.2
-datamapper
+dm-core
+dm-timestamps
 data_objects
 do_sqlite3
