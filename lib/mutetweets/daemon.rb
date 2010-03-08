@@ -34,5 +34,3 @@ to_friend.each {|id| client.friend(id) }
 
 # process tweets
 TweetStream.process!(client)
-
-# process mutes

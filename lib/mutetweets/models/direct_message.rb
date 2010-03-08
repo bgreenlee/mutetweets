@@ -9,6 +9,7 @@ class DirectMessage < Tweet
     if m = /@(\w+)\s+(?:for)?\s*(\d+)(s|m|h|d)/i.match(@text)
       @mutee = m[1]
       @length = m[2].to_i * UNITS[m[3]]
+      @direct_message = true
     end
   end
 end
