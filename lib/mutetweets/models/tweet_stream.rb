@@ -1,8 +1,8 @@
 class TweetStream
   include DataMapper::Resource
   
-  property :last_mention_id, Integer, :key => true, :default => 0
-  property :last_direct_message_id, Integer, :key => true, :default => 0
+  property :last_mention_id, String, :key => true
+  property :last_direct_message_id, String, :key => true
   
   # process new mutes
   def self.process!(client)
@@ -10,13 +10,13 @@ class TweetStream
 
     # get mentions
     options = {:count => 200}
-    options[:since_id] = tweet_stream.last_mention_id if tweet_stream.last_mention_id > 0
+    options[:since_id] = tweet_stream.last_mention_id unless tweet_stream.last_mention_id.blank?
     mentions = client.mentions(options).map {|m| Mention.new(m) }
     mutes = mentions.select {|m| m.valid_mute? }
     
     # get direct mesages
     options = {:count => 200}
-    options[:since_id] = tweet_stream.last_direct_message_id if tweet_stream.last_direct_message_id > 0
+    options[:since_id] = tweet_stream.last_direct_message_id unless tweet_stream.last_direct_message_id.blank?
     messages = client.messages(options).map {|m| DirectMessage.new(m) }
     mutes += messages.select {|m| m.valid_mute? }
     
@@ -25,7 +25,7 @@ class TweetStream
       Mute.create(:user => user, :screen_name => mute.mutee, :expires_at => Time.now + mute.length)
       # if the user doesn't have tokens, send a message with a login link (only send it once, though)
       if !user.registered? && !user.welcome_sent?
-        client.update("@#{user.screen_name} Welcome to Mute Tweets! Go to http://mutetweets.com/ to get started.")
+        client.update("@#{user.screen_name} Welcome to Mute Tweets! Go to http://mutetweets.com to get started.")
         user.update(:welcome_sent => true)
       end
     end
