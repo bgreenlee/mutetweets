@@ -6,6 +6,20 @@ $:.unshift "#{ROOT_DIR}/vendor/twitter_oauth/lib"
 require 'rubygems'
 require 'twitter_oauth'
 require 'mutetweets/models'
+require 'optparse'
+
+# defaults
+options = {
+  :verbose => false
+}
+
+OptionParser.new do |opts|
+  opts.on("-v", "--verbose", "Be verbose") { |v| options[:verbose] = true }
+  opts.on_tail("-h", "--help", "Show this message") do
+    puts opts
+    exit
+  end
+end.parse!
 
 # read config
 config = YAML.load_file(File.join(ROOT_DIR, "config.yml")) rescue nil || {}
@@ -33,4 +47,4 @@ to_unfriend.each {|id| client.unfriend(id) }
 to_friend.each {|id| client.friend(id) }
 
 # process tweets
-TweetStream.process!(client)
+TweetStreamProcessor.new(client, options[:verbose]).process
