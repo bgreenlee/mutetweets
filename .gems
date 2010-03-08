@@ -2,4 +2,4 @@ twitter_oauth --version 0.3.2
 dm-core
 dm-timestamps
 data_objects
-do_sqlite3
+do_mysql
