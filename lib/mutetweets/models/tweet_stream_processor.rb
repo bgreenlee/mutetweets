@@ -99,15 +99,16 @@ class TweetStreamProcessor
       response = @client.unfriend(m.screen_name)
       # if the user isn't friends with the mutee, or the mutee doesn't exist, delete the mute
       if response["error"]
-        say "Error: #{response['error']}"
-        if response["error"] =~ /not (found|friends)/i
-          m.update(:status => Mute::Status::ERROR, :error => resonse['error'])
+        err_msg = response["error"]
+        say "Error: #{err_msg}"
+        if err_msg =~ /not (found|friends)/i
+          m.update(:status => Mute::Status::ERROR, :error => err_msg)
         else
-          msg = "Error unfriending #{m.screen_name}: #{response['error']}"
+          msg = "Error unfriending #{m.screen_name}: #{err_msg}"
           m.retries += 1
           if m.retries > MAX_RETRIES
             error "#{msg} (giving up)"
-            m.update(:status => Mute::Status::ERROR, :error => response['error'])
+            m.update(:status => Mute::Status::ERROR, :error => err_msg)
           else
             error "#{msg} (attempt ##{m.retries})"
             m.save
@@ -125,12 +126,13 @@ class TweetStreamProcessor
       say "Refollowing #{m.screen_name}"
       response = @client.friend(m.screen_name)
       if response["error"] && response["error"] !~ /already on your list/i
-        say "Error: #{response['error']}"
-        msg = "Error friending #{m.screen_name}: #{response['error']}"
+        err_msg = response["error"]
+        say "Error: #{err_msg}"
+        msg = "Error friending #{m.screen_name}: #{err_msg}"
         m.retries += 1
         if m.retries > MAX_RETRIES
           error "#{msg} (giving up)"
-          m.update(:status => Mute::Status::ERROR, :error => response['error'])
+          m.update(:status => Mute::Status::ERROR, :error => err_msg)
         else
           error "#{msg} (attempt ##{m.retries})"
           m.save
