@@ -40,11 +40,15 @@ client = TwitterOAuth::Client.new(
 # we need to sync our followers and friends--friending people who are following us and unfriending people who are no longer following us
 followers = client.followers_ids
 friends = client.friends_ids
-to_friend = followers - friends
-to_unfriend = friends - followers
+if followers.is_a?(Array) && friends.is_a?(Array)
+  to_friend = followers - friends
+  to_unfriend = friends - followers
 
-to_unfriend.each {|id| client.unfriend(id) }
-to_friend.each {|id| client.friend(id) }
+  to_unfriend.each {|id| client.unfriend(id) }
+  to_friend.each {|id| client.friend(id) }
+else  
+  $stderr.puts "Unexpected response:\nfollowers: #{followers.inspect}\n\nfriends: #{friends.inspect}"
+end
 
 # process tweets
 TweetStreamProcessor.new(client, options[:verbose]).process
