@@ -13,7 +13,7 @@ set :app_file, "#{root_dir}/app.rb"
 set :raise_errors, true # disable when we're ready for production
 disable :run
 
-log = File.new("#{root_dir}/../logs/sinatra.log", "a+")
+log = File.new("#{root_dir}/log/sinatra.log", "a+")
 $stdout.reopen(log)
 $stderr.reopen(log)
 set :log_file, log

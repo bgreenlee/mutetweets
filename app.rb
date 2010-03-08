@@ -9,7 +9,7 @@ require 'mutetweets/helpers'
 configure do
   set :sessions, true
   @@config = YAML.load_file("config.yml") rescue nil || {}
-  LOGGER = Logger.new("../logs/sinatra.log")
+  LOGGER = Logger.new("log/sinatra.log")
   
   DataMapper.setup(:default, @@config['database'])
   DataMapper.auto_upgrade!
