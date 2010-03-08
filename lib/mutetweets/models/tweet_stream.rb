@@ -24,10 +24,14 @@ class TweetStream
     mutes += messages.select {|m| m.valid_mute? }
 
     mutes.each do |mute|
+      # skip any expired mutes
+      expires_at = mute.created_at + mute.length
+      next if expires_at > Time.now
+      
       user = User.first(:screen_name => mute.muter) || User.create(:screen_name => mute.muter)
       # make sure there isn't an active mute already
       unless Mute.first(:user => user, :screen_name => mute.mutee, :status => Mute::Status::ACTIVE)
-        Mute.create(:user => user, :screen_name => mute.mutee, :expires_at => mute.created_at + mute.length, :direct_message => mute.direct_message)
+        Mute.create(:user => user, :screen_name => mute.mutee, :expires_at => expires_at, :direct_message => mute.direct_message)
         # if the user doesn't have tokens, send a message with a login link (only send it once, though)
         if !user.registered? && !user.welcome_sent?
           if mute.direct_message?
