@@ -19,4 +19,13 @@ class Mute
   property :status, Integer, :default => 0
   property :retries, Integer, :default => 0  # retry counter in the case of errors unfollowing or refollowing
   property :error, Text
+  
+  def expired?
+    expires_at < Time.now
+  end
+  
+  # return true if there's an active mute for this user and mutee
+  def self.active_mute?(user, mutee)
+    !!first(:user => user, :screen_name => mutee, :expires_at.gt => Time.now, :status => [Status::NEW, Status::ACTIVE])
+  end
 end

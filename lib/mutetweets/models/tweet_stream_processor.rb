@@ -36,7 +36,7 @@ class TweetStreamProcessor
       
       user = User.first(:screen_name => mute.muter) || User.create(:screen_name => mute.muter)
       # make sure there isn't an active mute already
-      if Mute.first(:user => user, :screen_name => mute.mutee, :status => [Mute::Status::NEW, Mute::Status::ACTIVE])
+      if Mute.active_mute?(user, mute.mutee)
         say "Already have a new/active mute for #{mute.muter}/#{mute.mutee}! Skipping..."
         next
       else
@@ -95,8 +95,11 @@ class TweetStreamProcessor
   def process_unfollows
     to_unfollow = Mute.all(:expires_at.gte => Time.now, :status => Mute::Status::NEW)
     to_unfollow.each do |m|
-      say "Unfollowing #{m.screen_name}"
-      response = @client.unfriend(m.screen_name)
+      user = m.user
+      next unless user.registered? # can't do anything if the user isn't registered
+      say "Unfollowing #{m.screen_name} for #{user.screen_name}"
+      user_client = @client.for_user(user)
+      response = user_client.unfriend(m.screen_name)
       # if the user isn't friends with the mutee, or the mutee doesn't exist, delete the mute
       if response["error"]
         err_msg = response["error"]
@@ -123,8 +126,11 @@ class TweetStreamProcessor
   def process_refollows
     to_refollow = Mute.all(:expires_at.lte => Time.now, :status => Mute::Status::ACTIVE)
     to_refollow.each do |m|
-      say "Refollowing #{m.screen_name}"
-      response = @client.friend(m.screen_name)
+      user = m.user
+      next unless user.registered? # can't do anything if the user isn't registered
+      say "Refollowing #{m.screen_name} for #{user.screen_name}"
+      user_client = @client.for_user(user)
+      response = user_client.friend(m.screen_name)
       if response["error"] && response["error"] !~ /already on your list/i
         err_msg = response["error"]
         say "Error: #{err_msg}"
