@@ -52,8 +52,9 @@ get '/auth' do
       :oauth_verifier => params[:oauth_verifier]
     )
   rescue OAuth::Unauthorized
+    # TODO: error handling
   end
-  
+
   if @client.authorized?
       # find or create user
       user = User.first(:screen_name => @client.info['screen_name']) || 
