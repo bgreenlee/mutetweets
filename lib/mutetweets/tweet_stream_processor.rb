@@ -33,8 +33,15 @@ module MuteTweets
       mutes = get_mutes
       mutes.each do |mute|
         logger.info "mute: #{mute}"
-        # skip any expired mutes
-        expires_at = mute.created_at + mute.length
+        # skip any invalid and expired mutes
+        expires_at = nil
+        begin
+          expires_at = mute.created_at + mute.length
+        rescue RangeError
+          logger.warn "invalid time! skipping..."
+          next
+        end
+        
         if expires_at < Time.now
           logger.info "mute expired! skipping..."
           next
