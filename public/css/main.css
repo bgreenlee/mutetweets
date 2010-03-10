@@ -1,8 +1,19 @@
 body {font-size:16px; font-family:helvetica,arial,sans-serif;}
 img {border:none;}
 h2 {font-size:20px;}
+a {
+  text-decoration: none;
+  color: blue;
+}
 
 #header h1 {margin:0; font-size:24px;}
+
+#logo {
+  float: left;
+  margin-left: -88px;
+  border: 1px solid #93B3C7;
+}
+
 
 #content {
   margin:0 auto;
@@ -28,7 +39,7 @@ td {
 }
 
 table#examples .desc {
-  font-size: 80%;
+  font-size: 90%;
   font-style: italic;
   color: #666;
 }
