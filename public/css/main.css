@@ -13,19 +13,26 @@ h2 {font-size:20px;}
   float:right;
 }
 
-table#examples {
+code {
+  font-family:monospace;
+  font-size:16px;
+}
+
+table {
   border: none;
   width: 650px;
 }
 
-table#examples .example {
-  border: none;
-  font-family:monospace;
-  font-size: 16px;
+td {
+  vertical-align: top;
 }
 
 table#examples .desc {
   font-size: 80%;
   font-style: italic;
   color: #666;
+}
+
+table#options .option {
+  font-weight: bold;
 }
