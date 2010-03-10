@@ -3,7 +3,8 @@ class TweetStreamProcessor
   MAX_RETRIES = 3 # number of times to retry in the case of an error
   MESSAGE = {
     :welcome => "Welcome to Mute Tweets! Go to http://mutetweets.com to get started.",
-    :unregistered => "Sorry, I don't have you registered yet. Go to http://mutetweets.com to get started."
+    :unregistered => "Sorry, I don't have you registered yet. Go to http://mutetweets.com to get started.",
+    :invalid_creds => "Sorry, it seems the credentials I have for you are invalid. Go to http://mutetweets.com to reconnect."
   }
 
   def initialize(client, verbose = false)
@@ -43,15 +44,8 @@ class TweetStreamProcessor
         # create the mute
         Mute.create(:user => user, :screen_name => mute.mutee, :expires_at => expires_at, :direct_message => mute.direct_message)
         # if the user doesn't have tokens, send a message with a login link (only send it once, though)
-        if !user.registered?
-          msg = user.welcome_sent? ? MESSAGE[:unregistered] : MESSAGE[:welcome]
-          if mute.direct_message?
-            say "Sending direct message to #{user.screen_name}: #{msg}"
-            @client.message(user.screen_name, msg)
-          else
-            say "Sending public message to #{user.screen_name}: #{msg}"
-            @client.update("@#{user.screen_name} #{msg}")
-          end
+        unless user.registered?
+          message_user(user, user.welcome_sent? ? MESSAGE[:unregistered] : MESSAGE[:welcome], mute.direct_message?)
           user.update(:welcome_sent => true)
         end
       end
@@ -104,8 +98,12 @@ class TweetStreamProcessor
       if response["error"]
         err_msg = response["error"]
         say "Error: #{err_msg}"
-        if err_msg =~ /not (found|friends)/i
+        case err_msg
+        when /not (found|friends)/i
           m.update(:status => Mute::Status::ERROR, :error => err_msg)
+        when /Could not authenticate/i
+          user.clear_tokens!
+          message_user(user, MESSAGE[:invalid_creds], m.direct_message?)
         else
           msg = "Error unfriending #{m.screen_name}: #{err_msg}"
           m.retries += 1
@@ -131,17 +129,25 @@ class TweetStreamProcessor
       say "Refollowing #{m.screen_name} for #{user.screen_name}"
       user_client = @client.for_user(user)
       response = user_client.friend(m.screen_name)
-      if response["error"] && response["error"] !~ /already on your list/i
+      if response["error"]
         err_msg = response["error"]
-        say "Error: #{err_msg}"
-        msg = "Error friending #{m.screen_name}: #{err_msg}"
-        m.retries += 1
-        if m.retries > MAX_RETRIES
-          error "#{msg} (giving up)"
-          m.update(:status => Mute::Status::ERROR, :error => err_msg)
+        case err_msg
+        when /already on your list/i
+          # just ignore
+        when /Could not authenticate/i
+          user.clear_tokens!
+          message_user(user, MESSAGE[:invalid_creds], m.direct_message?)
         else
-          error "#{msg} (attempt ##{m.retries})"
-          m.save
+          say "Error: #{err_msg}"
+          msg = "Error friending #{m.screen_name}: #{err_msg}"
+          m.retries += 1
+          if m.retries > MAX_RETRIES
+            error "#{msg} (giving up)"
+            m.update(:status => Mute::Status::ERROR, :error => err_msg)
+          else
+            error "#{msg} (attempt ##{m.retries})"
+            m.save
+          end
         end
       else
         m.update(:status => Mute::Status::EXPIRED)
@@ -153,6 +159,16 @@ class TweetStreamProcessor
     @tweet_stream.last_mention_id = @last_mention_id if @last_mention_id
     @tweet_stream.last_direct_message_id = @last_direct_message_id if @last_direct_message_id
     @tweet_stream.save if @last_mention_id || @last_direct_message_id
+  end
+  
+  def message_user(user, message, direct_message = true)
+    if direct_message
+      say "Sending direct message to #{user.screen_name}: #{message}"
+      @client.message(user.screen_name, message)
+    else
+      say "Sending public message to #{user.screen_name}: #{message}"
+      @client.update("@#{user.screen_name} #{message}")
+    end
   end
   
   def say(msg)

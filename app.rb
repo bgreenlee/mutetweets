@@ -62,14 +62,11 @@ get '/auth' do
                          :access_token => @access_token.token,
                          :secret_token => @access_token.secret)
 
-      if !user.registered?
-        user.access_token = @access_token.token
-        user.secret_token = @access_token.secret
-        user.save
-      end
+      # update user tokens regardless, since they may have disconnected and reconnected
+      user.access_token = session[:access_token] = @access_token.token
+      user.secret_token = session[:secret_token] = @access_token.secret
+      user.save
       
-      session[:access_token] = @access_token.token
-      session[:secret_token] = @access_token.secret
       session[:user] = @client.info['screen_name']
   end
   

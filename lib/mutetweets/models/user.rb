@@ -13,4 +13,8 @@ class User
   def registered?
     !(access_token.blank? || secret_token.blank?)
   end
+  
+  def clear_tokens!
+    update(:access_token => nil, :secret_token => nil)
+  end
 end
