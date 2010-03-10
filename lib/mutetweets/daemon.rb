@@ -7,6 +7,7 @@ require 'rubygems'
 require 'twitter_oauth'
 require 'mutetweets/models'
 require 'mutetweets/client'
+require 'mutetweets/tweet_stream_processor'
 require 'optparse'
 
 # defaults
