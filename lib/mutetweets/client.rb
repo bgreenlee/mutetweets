@@ -51,10 +51,10 @@ module MuteTweets
     # message the user; if they're a follower, send a DM; otherwise, a public message
     def send_message(user, message)
       if is_follower?(user)
-        say "Sending direct message to #{user.screen_name}: #{message}"
+        # say "Sending direct message to #{user.screen_name}: #{message}"
         @client.message(user.screen_name, message)
       else
-        say "Sending public message to #{user.screen_name}: #{message}"
+        # say "Sending public message to #{user.screen_name}: #{message}"
         @client.update("@#{user.screen_name} #{message}")
       end
     end
