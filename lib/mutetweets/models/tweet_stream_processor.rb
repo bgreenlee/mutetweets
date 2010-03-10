@@ -109,7 +109,9 @@ class TweetStreamProcessor
           m.retries += 1
           if m.retries > MAX_RETRIES
             error "#{msg} (giving up)"
-            m.update(:status => Mute::Status::ERROR, :error => err_msg)
+            m.status = Mute::Status::ERROR
+            m.error = err_msg
+            m.save
           else
             error "#{msg} (attempt ##{m.retries})"
             m.save
@@ -143,7 +145,9 @@ class TweetStreamProcessor
           m.retries += 1
           if m.retries > MAX_RETRIES
             error "#{msg} (giving up)"
-            m.update(:status => Mute::Status::ERROR, :error => err_msg)
+            m.status = Mute::Status::ERROR
+            m.error = err_msg
+            m.save
           else
             error "#{msg} (attempt ##{m.retries})"
             m.save
