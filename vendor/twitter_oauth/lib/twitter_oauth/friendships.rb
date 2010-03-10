@@ -24,7 +24,7 @@ module TwitterOAuth
     # Tests for the existence of friendship between two users. Will return true if user_a follows user_b, otherwise will return false.
     # You are better off using get_friendship as it returns more extended information.
     def friends?(a, b)
-      oauth_response = access_token.get("/friendships/exists.json", :user_a => a, :user_b => b)
+      oauth_response = access_token.get("/friendships/exists.json?user_a=#{a}&user_b=#{b}")
       oauth_response.body.strip == 'true'
     end
     
