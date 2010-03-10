@@ -16,6 +16,7 @@ class Mute
   property :expires_at, DateTime, :required => true  # when the mute expires
   property :created_at, DateTime, :required => true, :index => true
   property :direct_message, Boolean, :default => false # true if the mute was created via a DM
+  property :verbose, Boolean, :default => false # true if user wants to be messaged on un/refollow
   property :status, Integer, :default => 0
   property :retries, Integer, :default => 0  # retry counter in the case of errors unfollowing or refollowing
   property :error, Text

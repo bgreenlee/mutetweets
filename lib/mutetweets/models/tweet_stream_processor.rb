@@ -42,7 +42,8 @@ class TweetStreamProcessor
         next
       else
         # create the mute
-        Mute.create(:user => user, :screen_name => mute.mutee, :expires_at => expires_at, :direct_message => mute.direct_message)
+        Mute.create(:user => user, :screen_name => mute.mutee, :expires_at => expires_at, 
+                    :direct_message => mute.direct_message, :verbose => mute.verbose)
         # if the user doesn't have tokens, send a message with a login link (only send it once, though)
         unless user.registered?
           @client.send_message(user, user.welcome_sent? ? MESSAGE[:unregistered] : MESSAGE[:welcome])
@@ -119,6 +120,7 @@ class TweetStreamProcessor
         end
       else
         m.update(:status => Mute::Status::ACTIVE)
+        @client.send_message(user, "Muted #{m.screen_name}") if m.verbose?
       end
     end
   end
@@ -155,6 +157,7 @@ class TweetStreamProcessor
         end
       else
         m.update(:status => Mute::Status::EXPIRED)
+        @client.send_message(user, "Unmuted #{m.screen_name}") if m.verbose?
       end
     end
   end
