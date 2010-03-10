@@ -57,8 +57,10 @@ get '/auth' do
 
   if @client.authorized?
       # find or create user
-      user = User.first(:screen_name => @client.info['screen_name']) || 
-             User.create(:screen_name => @client.info['screen_name'], 
+      user_info = @client.info
+      user = User.first(:twitter_id => user_info['id']) ||
+             User.create(:screen_name => user_info['screen_name'],
+                         :twitter_id => user_info['id'],
                          :access_token => @access_token.token,
                          :secret_token => @access_token.secret)
 

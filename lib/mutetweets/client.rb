@@ -1,6 +1,6 @@
 module MuteTweets
   class Client < TwitterOAuth::Client
-    attr_reader :client
+    attr_reader :client, :follower_ids
     
     # create a new client instance. If a user is provided, log in as that user.
     # Otherwise, log in as mutetweets
@@ -37,8 +37,25 @@ module MuteTweets
 
         to_unfriend.each {|id| unfriend(id) }
         to_friend.each {|id| friend(id) }
+        
+        @follower_ids = followers
       else  
         $stderr.puts "Unexpected response:\nfollowers: #{followers.inspect}\n\nfriends: #{friends.inspect}"
+      end
+    end
+    
+    def is_follower?(user)
+      follower_ids.include?(user.twitter_id)
+    end
+    
+    # message the user; if they're a follower, send a DM; otherwise, a public message
+    def send_message(user, message)
+      if is_follower?(user)
+        say "Sending direct message to #{user.screen_name}: #{message}"
+        @client.message(user.screen_name, message)
+      else
+        say "Sending public message to #{user.screen_name}: #{message}"
+        @client.update("@#{user.screen_name} #{message}")
       end
     end
   end

@@ -45,7 +45,7 @@ class TweetStreamProcessor
         Mute.create(:user => user, :screen_name => mute.mutee, :expires_at => expires_at, :direct_message => mute.direct_message)
         # if the user doesn't have tokens, send a message with a login link (only send it once, though)
         unless user.registered?
-          message_user(user, user.welcome_sent? ? MESSAGE[:unregistered] : MESSAGE[:welcome], mute.direct_message?)
+          @client.send_message(user, user.welcome_sent? ? MESSAGE[:unregistered] : MESSAGE[:welcome])
           user.update(:welcome_sent => true)
         end
       end
@@ -103,7 +103,7 @@ class TweetStreamProcessor
           m.update(:status => Mute::Status::ERROR, :error => err_msg)
         when /Could not authenticate/i
           user.clear_tokens!
-          message_user(user, MESSAGE[:invalid_creds], m.direct_message?)
+          @client.send_message(user, MESSAGE[:invalid_creds])
         else
           msg = "Error unfriending #{m.screen_name}: #{err_msg}"
           m.retries += 1
@@ -136,7 +136,7 @@ class TweetStreamProcessor
           # just ignore
         when /Could not authenticate/i
           user.clear_tokens!
-          message_user(user, MESSAGE[:invalid_creds], m.direct_message?)
+          @client.send_message(user, MESSAGE[:invalid_creds])
         else
           say "Error: #{err_msg}"
           msg = "Error friending #{m.screen_name}: #{err_msg}"
@@ -159,16 +159,6 @@ class TweetStreamProcessor
     @tweet_stream.last_mention_id = @last_mention_id if @last_mention_id
     @tweet_stream.last_direct_message_id = @last_direct_message_id if @last_direct_message_id
     @tweet_stream.save if @last_mention_id || @last_direct_message_id
-  end
-  
-  def message_user(user, message, direct_message = true)
-    if direct_message
-      say "Sending direct message to #{user.screen_name}: #{message}"
-      @client.message(user.screen_name, message)
-    else
-      say "Sending public message to #{user.screen_name}: #{message}"
-      @client.update("@#{user.screen_name} #{message}")
-    end
   end
   
   def say(msg)
