@@ -3,7 +3,7 @@ class Tweet
   attr_reader :id, :created_at, :text, :muter, :mutee, :length, :direct_message, :verbose
 
   # time unit multpliers
-  UNITS = {'s' => 1, 'm' => 60, 'h' => 3600, 'd' => 86400}
+  UNITS = {'m' => 60, 'h' => 3600, 'd' => 86400}
 
   def initialize(params)
     @id = params["id"]
