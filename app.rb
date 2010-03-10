@@ -1,10 +1,8 @@
 #!/usr/bin/env ruby
-require 'rubygems'
 require 'rack/logger'
-require 'sinatra'
+require 'helpers'
 require 'twitter_oauth'
 require 'mutetweets/models'
-require 'mutetweets/helpers'
 
 configure do
   set :sessions, true

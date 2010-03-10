@@ -1,5 +1,7 @@
 module MuteTweets
-  class Client < TwitterOAuth::Client
+  include Logger
+
+  class Client < TwitterOAuth::Client    
     attr_reader :client, :follower_ids
     
     # create a new client instance. If a user is provided, log in as that user.
@@ -27,20 +29,26 @@ module MuteTweets
       # this should never be run for any user other than mutetweets
       raise "Refusing to sync #{@user.screen_name}'s followers!" if @user
       
+      logger.debug "syncing followers"
+      
       # process followers
       # we need to sync our followers and friends--friending people who are following us and unfriending people who are no longer following us
       followers = followers_ids
+      logger.debug "followers: #{followers.length}"
       friends = friends_ids
+      logger.debug "friends: #{friends.length}"
       if followers.is_a?(Array) && friends.is_a?(Array)
         to_friend = followers - friends
         to_unfriend = friends - followers
 
         to_unfriend.each {|id| unfriend(id) }
+        logger.debug "unfriended #{to_unfriend.length}" if to_unfriend.any?
         to_friend.each {|id| friend(id) }
+        logger.debug "friended #{to_friend.length}" if to_friend.any?
         
         @follower_ids = followers
       else  
-        $stderr.puts "Unexpected response:\nfollowers: #{followers.inspect}\n\nfriends: #{friends.inspect}"
+        logger.error "unexpected response: followers: #{followers.inspect} friends: #{friends.inspect}"
       end
     end
     
@@ -51,11 +59,14 @@ module MuteTweets
     # message the user; if they're a follower, send a DM; otherwise, a public message
     def send_message(user, message)
       if is_follower?(user)
-        # say "Sending direct message to #{user.screen_name}: #{message}"
-        message(user.screen_name, message)
+        logger.info "sending direct message to #{user.screen_name}: #{message}"
+        response = message(user.screen_name, message)
       else
-        # say "Sending public message to #{user.screen_name}: #{message}"
-        update("@#{user.screen_name} #{message}")
+        logger.info "sending public message to #{user.screen_name}: #{message}"
+        response = update("@#{user.screen_name} #{message}")
+      end
+      if response['error']
+        logger.error "error sending message: #{response['error']}"
       end
     end
   end

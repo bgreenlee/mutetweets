@@ -1,27 +1,37 @@
 #!/usr/bin/env ruby
-ROOT_DIR = File.join(File.dirname(__FILE__), "..", "..")
+ROOT_DIR = File.join(File.dirname(__FILE__), "..")
 $:.unshift "#{ROOT_DIR}/lib"
 $:.unshift "#{ROOT_DIR}/vendor/twitter_oauth/lib"
 
+require 'logger'
+require 'optparse'
+require 'mutetweets/logger'
 require 'rubygems'
 require 'twitter_oauth'
 require 'mutetweets/models'
 require 'mutetweets/client'
 require 'mutetweets/tweet_stream_processor'
-require 'optparse'
+
+include MuteTweets::Logger
 
 # defaults
 options = {
-  :verbose => false
+  :verbose => false,
+  :debug => false
 }
 
 OptionParser.new do |opts|
-  opts.on("-v", "--verbose", "Be verbose") { |v| options[:verbose] = true }
+  opts.on("-v", "--verbose", "Be verbose (output to stdout)") { |v| options[:verbose] = true }
+  opts.on("-d", "--debug", "Debug logging") { |v| options[:debug] = true }
   opts.on_tail("-h", "--help", "Show this message") do
     puts opts
     exit
   end
 end.parse!
+
+set_log_output($stdout) if options[:verbose]
+set_log_level(:debug) if options[:verbose] || options[:debug]
+logger.debug "starting daemon"
 
 # read config
 config = YAML.load_file(File.join(ROOT_DIR, "config.yml")) rescue nil || {}
@@ -36,4 +46,4 @@ client = MuteTweets::Client.new(config)
 client.sync_followers!
 
 # process tweets
-TweetStreamProcessor.new(client, options[:verbose]).process
+MuteTweets::TweetStreamProcessor.new(client).process
