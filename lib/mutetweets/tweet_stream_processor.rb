@@ -33,8 +33,10 @@ module MuteTweets
       mutes = get_mutes
       mutes.each do |mute|
         logger.info "mute: #{mute}"
+
         # skip any invalid and expired mutes
         expires_at = nil
+
         begin
           expires_at = mute.created_at + mute.length
         rescue RangeError

@@ -7,7 +7,13 @@ a {
 }
 ul {
   margin-left: 0;
-  padding-left: 1em;
+  padding-left: 0em;
+  list-style: none;
+}
+
+li > h4 {
+  margin-bottom: 0;
+  padding-bottom: 0;
 }
 
 #header h1 {margin:0; font-size:24px;}

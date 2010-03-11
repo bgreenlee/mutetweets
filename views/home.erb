@@ -6,7 +6,7 @@
 <p>To mute someone, just tweet:</p>
   
 <p><code>
-@mutetweets <em>&lt;@noisyperson&gt; &lt;length of time&gt;</em> 
+[d] @mutetweets <em>&lt;@noisyperson&gt; &lt;length of time&gt;</em> 
 </code><p>
   
 <p><em><code>&lt;length of time&gt;</code></em> follows the format <em><code>&lt;number&gt;&lt;unit&gt;</code></em>, where <em><code>&lt;unit&gt;</code></em> is one of "m" (minutes), "h" (hours), or "d" (days).</p>
@@ -15,11 +15,11 @@
 
 <table id="examples">
 <tr>
-  <td class="example"><code>@mutetweets @gruber 3h</code></td>
-  <td class="desc"># mute @gruber for 3 hours (until the baseball game is over)</td>
+  <td class="example"><code>@mutetweets @scobleizer 3h</code></td>
+  <td class="desc"># mute @scobleizer for 3 hours</td>
 </tr>
 <tr>
-  <td class="example"><code>d mutetweets @gruber 3h</code></td>
+  <td class="example"><code>d mutetweets @scobleizer 3h</code></td>
   <td class="desc"># send a direct message instead</td>
 </tr>
 </table>
@@ -31,15 +31,23 @@
   <td class="option">-v or -verbose</td>
   <td class="desc">
     get direct messages when your mute starts and ends<br>
-    Example: <code>d mutetweets @gruber 3h -verbose</code>
+    Example: <code>d mutetweets @scobleizer 3h -verbose</code>
   </td>
 </tr>
 </table>
 
 
 <h3>Notes &amp; Issues</h3>
+
 <ul>
-  <li>The person you muted will get a "...is now following you on Twitter" message when the mute expires (unless they've turned notifications off).</li>
-  <li>If your tweets are protected, you have to follow <a href="http://twitter.com/mutetweets">mutetweets</a> first.</li>
-  <li>If you have an questions or problems, send an email to <a href="mailto:support@mutetweets.com">support@mutetweets.com</a>.</li>
+  <li>
+    <h4>Don't you be annoying either.</h4>
+    <p>Keep in mind that the person you muted will get a "...is now following you on Twitter" message when the mute expires (unless they've turned notifications off), and if you don't use a direct message, the person will also see it in their mention stream. Because of this, please use sparingly (if you're muting someone a lot, maybe you shouldn't be following them).</p>
+  </li><li>
+    <h4>What? I can't hear you.</h4>
+    <p>If your tweets are protected, you have to follow <a href="http://twitter.com/mutetweets">mutetweets</a> first.</p>
+  </li><li>
+    <h4>Help!</h4>
+    <p>If you have an questions or problems, send an email to <a href="mailto:support@mutetweets.com">support@mutetweets.com</a>.</p>
+  </li>
 </ul>
