@@ -3,6 +3,7 @@ require 'rack/logger'
 require 'helpers'
 require 'twitter_oauth'
 require 'mutetweets/models'
+require 'erubis'
 
 configure do
   set :sessions, true
@@ -25,7 +26,7 @@ before do
 end
 
 get '/' do
-  erb :home
+  erubis :home
 end
 
 # store the request tokens and send to Twitter

@@ -1,10 +1,13 @@
 #!/usr/bin/env ruby
 root_dir = File.dirname(__FILE__)
-$:.unshift "#{root_dir}/lib"
-$:.unshift "#{root_dir}/vendor/twitter_oauth/lib"
+$:.unshift *%w{
+  lib
+  vendor/twitter_oauth/lib
+  vendor/sinatra/lib
+}.map {|lib| "#{root_dir}/#{lib}"}
 
-require 'rubygems'
 require 'sinatra'
+require 'rubygems'
 require 'app'
 
 set :environment, :production
