@@ -43,7 +43,17 @@ DataMapper.auto_upgrade!
 # create twitter client
 client = MuteTweets::Client.new(config)
 
-client.sync_followers!
-
-# process tweets
-MuteTweets::TweetStreamProcessor.new(client).process
+begin
+  client.sync_followers!
+  # process tweets
+  MuteTweets::TweetStreamProcessor.new(client).process
+rescue JSON::ParserError => e
+  msg = ''
+  if e.message =~ /trackPageview\('(\d+ Error)'/
+    msg << $1
+  else
+    msg << e.message
+  end
+  
+  logger.warn "twitter barfed: #{msg}; backtrace: #{e.backtrace}"
+end
