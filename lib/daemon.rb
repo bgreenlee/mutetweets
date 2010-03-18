@@ -55,7 +55,7 @@ rescue JSON::ParserError => e
     msg << e.message
   end
   
-  logger.warn "twitter barfed: #{msg}; backtrace: #{e.backtrace}"
+  logger.warn "twitter barfed: #{msg}"
 rescue Timeout::Error => e
   logger.warn "connection to twitter timed out"
 end
