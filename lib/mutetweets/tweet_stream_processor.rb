@@ -102,8 +102,7 @@ module MuteTweets
     end
   
     def process_unfollows
-      to_unfollow = Mute.all(:expires_at.gte => Time.now, :status => Mute::Status::NEW)
-      to_unfollow.each do |m|
+      Mute.to_unfollow.each do |m|
         user = m.user
         next unless user.registered? # can't do anything if the user isn't registered
         logger.info "unfollowing #{m.screen_name} for #{user.screen_name}"
@@ -115,7 +114,7 @@ module MuteTweets
           logger.error "error: #{err_msg}"
           case err_msg
           when /not (found|friends)/i
-            m.update(:status => Mute::Status::ERROR, :error => err_msg)
+            m.error!(err_msg)
           when /Could not authenticate/i
             user.clear_tokens!
             @client.send_message(user, MESSAGE[:invalid_creds])
@@ -124,24 +123,21 @@ module MuteTweets
             m.retries += 1
             if m.retries > MAX_RETRIES
               logger.error "#{msg} (giving up)"
-              m.status = Mute::Status::ERROR
-              m.error = err_msg
-              m.save
+              m.error!(err_msg)
             else
               logger.error "#{msg} (attempt ##{m.retries})"
               m.save
             end
           end
         else
-          m.update(:status => Mute::Status::ACTIVE)
+          m.activate!
           @client.send_message(user, "Muted #{m.screen_name}") if m.verbose?
         end
       end
     end
   
     def process_refollows
-      to_refollow = Mute.all(:expires_at.lte => Time.now, :status => Mute::Status::ACTIVE)
-      to_refollow.each do |m|
+      Mute.to_refollow.each do |m|
         user = m.user
         next unless user.registered? # can't do anything if the user isn't registered
         logger.info "refollowing #{m.screen_name} for #{user.screen_name}"
@@ -152,6 +148,8 @@ module MuteTweets
           case err_msg
           when /already on your list/i
             # just ignore
+            logger.info "#{user.screen_name} was already following #{m.screen_name}"
+            m.expire!
           when /Could not authenticate/i
             user.clear_tokens!
             @client.send_message(user, MESSAGE[:invalid_creds])
@@ -161,16 +159,14 @@ module MuteTweets
             m.retries += 1
             if m.retries > MAX_RETRIES
               logger.error "#{msg} (giving up)"
-              m.status = Mute::Status::ERROR
-              m.error = err_msg
-              m.save
+              m.error!(err_msg)
             else
               logger.error "#{msg} (attempt ##{m.retries})"
               m.save
             end
           end
         else
-          m.update(:status => Mute::Status::EXPIRED)
+          m.expire!
           @client.send_message(user, "Unmuted #{m.screen_name}") if m.verbose?
         end
       end
