@@ -23,7 +23,7 @@ class Mute
   
   # return mutes to unfollow (new mutes)
   def self.to_unfollow
-    all(:expires_at.lte => Time.now, :status => Status::NEW)
+    all(:expires_at.gte => Time.now, :status => Status::NEW)
   end
   
   # return mutes to refollow
