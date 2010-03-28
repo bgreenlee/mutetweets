@@ -8,7 +8,7 @@ require 'erubis'
 configure do
   set :sessions, true
   @@config = YAML.load_file("config.yml") rescue nil || {}
-  LOGGER = Logger.new("log/sinatra.log")
+  LOGGER = Logger.new("log/sinatra.log", development? ? ::Logger::DEBUG : ::Logger::INFO)
   
   DataMapper.setup(:default, @@config['database'])
   DataMapper.auto_upgrade!
@@ -16,7 +16,11 @@ end
 
 before do
   next if request.path_info =~ /ping$/
-  @user = session[:user]
+  if session[:user]
+    @user = User.get(session[:user])
+    @num_mutes = @user.mutes.active.count
+  end
+  
   @client = TwitterOAuth::Client.new(
     :consumer_key => @@config['consumer_key'],
     :consumer_secret => @@config['consumer_secret'],
@@ -27,6 +31,14 @@ end
 
 get '/' do
   erubis :home
+end
+
+# display the user's active mutes
+get '/mutes' do
+  redirect '/' unless @user
+    
+  @mutes = @user.mutes.active
+  erubis :mutes
 end
 
 # store the request tokens and send to Twitter
@@ -54,7 +66,7 @@ get '/auth' do
     # TODO: error handling
   end
 
-  if @client.authorized?
+  if @client.authorized? && @access_token
       # find or create user
       user_info = @client.info
       user = User.first(:twitter_id => user_info['id']) ||
@@ -68,7 +80,7 @@ get '/auth' do
       user.secret_token = session[:secret_token] = @access_token.secret
       user.save
       
-      session[:user] = @client.info['screen_name']
+      session[:user] = user.id
   end
   
   redirect '/'

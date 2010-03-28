@@ -1,0 +1,18 @@
+<% if @num_mutes > 0 -%>
+<h3>Your Mutes</h3>
+<table id="active-mutes">
+<tr>
+  <th>User</th><th>Expiration</th>
+</tr>
+<% @mutes.each_with_index do |mute, i| -%>
+<tr class="<%= i % 2 == 0 ? 'even' : 'odd' %>">
+  <td><a href="http://twitter.com/<%= mute.screen_name %>"><%= mute.screen_name %></a></td>
+  <td><%= mute.expires_at.strftime("%a %b %d, %Y at %I:%S%p") %></td>
+</tr>
+<% end -%>
+</table>
+<% else -%>
+<p id="no-mutes">You have no active mutes.</p>
+<% end -%>
+
+<p><a href="/">[home]</a></p>

@@ -2,13 +2,6 @@
 class Mute
   include DataMapper::Resource
   
-  class Status
-    NEW = 0
-    ACTIVE = 1
-    EXPIRED = 2
-    ERROR = 3
-  end
-    
   belongs_to :user
   
   property :id, Serial
@@ -20,6 +13,18 @@ class Mute
   property :status, Integer, :default => 0
   property :retries, Integer, :default => 0  # retry counter in the case of errors unfollowing or refollowing
   property :error, Text
+  
+  class Status
+    NEW = 0
+    ACTIVE = 1
+    EXPIRED = 2
+    ERROR = 3
+  end  
+
+  # filter for active mutes
+  def self.active
+    all(:status => Status::ACTIVE)
+  end
   
   # return mutes to unfollow (new mutes)
   def self.to_unfollow

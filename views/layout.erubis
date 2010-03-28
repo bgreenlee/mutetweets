@@ -13,12 +13,18 @@
     <div>
       <div id="login-status">
         <% if @user %>
-        Welcome, <strong><%= @user %></strong>! <a href='/disconnect'>[logout]</a>
+        Welcome, <strong><%= @user.screen_name %></strong>!
+        <a href='/disconnect'>[logout]</a><br>
+          You have <% if @num_mutes > 0 -%>
+            <a href="/mutes"><%= pluralize(@num_mutes, 'active mute') %></a>
+          <% else -%>
+            no active mutes.
+          <% end -%>
         <% else %>
         <a href="/connect"><img src="/images/sign_in_with_twitter.gif"/></a>
         <% end %>
       </div>
-      <a href="http://twitter.com/mutetweets"><img id="logo" src="/images/mutetweets.png"/></a>
+      <a href="/"><img id="logo" src="/images/mutetweets.png"/></a>
       <h1>Mute Tweets</h1>
     </div>
   </div>
