@@ -37,6 +37,15 @@ li > h4 {
   font-size: 90%;
 }
 
+.error {
+  background-color: #f93;
+  padding: 0.5em;
+  color: #fff;
+  border: 1px solid #c93;
+  text-align: center;
+  font-size:90%;
+}
+
 code {
   font-family:monospace;
   font-size:16px;
