@@ -11,4 +11,12 @@ helpers do
   def development?
     ENV['RACK_ENV'] == 'development'
   end
+  
+  def reset_session
+    session[:user] = nil
+    session[:request_token] = nil
+    session[:request_token_secret] = nil
+    session[:access_token] = nil
+    session[:secret_token] = nil
+  end
 end

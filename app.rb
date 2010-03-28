@@ -17,8 +17,11 @@ end
 before do
   next if request.path_info =~ /ping$/
   if session[:user]
-    @user = User.get(session[:user])
-    @num_mutes = @user.mutes.active.count
+    if @user = User.get(session[:user])
+      @num_mutes = @user.mutes.active.count
+    else
+      reset_session
+    end
   end
   
   @client = TwitterOAuth::Client.new(
@@ -87,11 +90,7 @@ get '/auth' do
 end
 
 get '/disconnect' do
-  session[:user] = nil
-  session[:request_token] = nil
-  session[:request_token_secret] = nil
-  session[:access_token] = nil
-  session[:secret_token] = nil
+  reset_session
   redirect '/'
 end
 
