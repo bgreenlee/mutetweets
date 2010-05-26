@@ -49,9 +49,16 @@ module MuteTweets
           to_unfriend = friends - followers
 
           to_unfriend.each {|id| unfriend(id) }
-          logger.info "unfriended #{to_unfriend.length}" if to_unfriend.any?
-          to_friend.each {|id| friend(id) }
-          logger.info "friended #{to_friend.length}" if to_friend.any?
+          logger.info "unfriended #{to_unfriend.length} (#{to_unfriend.join(', ')})" if to_unfriend.any?
+          if to_friend.any?
+            to_friend.each {|id| friend(id) }
+            # see if we were actually successful--people who have their accounts protected won't
+            # work right away.
+            # FIXME - Fortunately Twitter only sends one notice, but we should keep track of friend
+            # requests we've made so we don't keep doing them every minute
+            successfully_friended = to_friend & friends_ids
+            logger.info "friended #{successfully_friended.length} (#{successfully_friended.join(', ')})" if successfully_friended.any?
+          end
 
           @follower_ids = followers
         end
