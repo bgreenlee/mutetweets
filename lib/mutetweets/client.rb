@@ -48,16 +48,25 @@ module MuteTweets
           to_friend = followers - friends
           to_unfriend = friends - followers
 
-          to_unfriend.each {|id| unfriend(id) }
+          to_unfriend.each do |id|
+            unfriend(id)
+            # remove any protected accounts we're unfriending, so if they
+            # happen to friend us again, we'll pick them up
+            if protected_account = ProtectedAccount.first(:twitter_id => id)
+              protected_account.destroy
+            end
+          end
           logger.info "unfriended #{to_unfriend.length} (#{to_unfriend.join(', ')})" if to_unfriend.any?
           if to_friend.any?
-            to_friend.each {|id| friend(id) }
-            # see if we were actually successful--people who have their accounts protected won't
-            # work right away.
-            # FIXME - Fortunately Twitter only sends one notice, but we should keep track of friend
-            # requests we've made so we don't keep doing them every minute
-            successfully_friended = to_friend & friends_ids
-            logger.info "friended #{successfully_friended.length} (#{successfully_friended.join(', ')})" if successfully_friended.any?
+            # keep track of protected accounts so we don't keep friending them
+            protected_account_ids = ProtectedAccount.all.map(&:twitter_id)
+            to_friend = to_friend - protected_account_ids
+            to_friend.each do |id|
+              response = friend(id)
+              if response["protected"] || response["error"] =~ /already requested to follow/
+                ProtectedAccount.create(:twitter_id => id)
+              end
+            end
           end
 
           @follower_ids = followers
