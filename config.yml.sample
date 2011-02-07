@@ -1,4 +1,6 @@
-consumer_key: CONSUMER_KEY
-consumer_secret: CONSUMER_SECRET
-callback_url: http://mutetweets.com/auth
+consumer_key:
+consumer_secret:
+callback_url: http://mutetweets.dev/auth
+client_access_token:
+client_secret_token:
 database: sqlite3://PATH/data/mutetweets.sqlite3
