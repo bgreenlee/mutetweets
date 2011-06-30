@@ -76,7 +76,7 @@ module MuteTweets
     def get_mutes_from_mentions
       # get mentions
       options = {:count => MAX_FETCH}
-      options[:since_id] = @tweet_stream.last_mention_id unless @tweet_stream.last_mention_id.blank?
+      options[:since_id] = @tweet_stream.last_mention_id unless @tweet_stream.last_mention_id.empty?
       mentions = @client.mentions(options).map {|m| Mention.new(m) }
 
       if mentions.any?
@@ -91,7 +91,7 @@ module MuteTweets
     def get_mutes_from_direct_messages
       # get direct mesages
       options = {:count => MAX_FETCH}
-      options[:since_id] = @tweet_stream.last_direct_message_id unless @tweet_stream.last_direct_message_id.blank?
+      options[:since_id] = @tweet_stream.last_direct_message_id unless @tweet_stream.last_direct_message_id.empty?
       messages = @client.messages(options).map {|m| DirectMessage.new(m) }    
       if messages.any?
         @last_direct_message_id = messages.first.id
