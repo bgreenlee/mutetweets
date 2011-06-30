@@ -1,5 +1,6 @@
 require 'dm-core'
 require 'dm-timestamps'
+require 'dm-migrations'
 require 'mutetweets/models/user'
 require 'mutetweets/models/mute'
 require 'mutetweets/models/tweet'

@@ -1,16 +1,14 @@
 #!/usr/bin/env ruby
 root_dir = File.dirname(__FILE__)
-$:.unshift *%w{
-  lib
-  vendor/twitter_oauth/lib
-  vendor/sinatra/lib
-}.map {|lib| "#{root_dir}/#{lib}"}
+$:.unshift "#{root_dir}/lib"
 
-require 'sinatra'
 require 'rubygems'
+require 'sinatra'
 require 'app'
 
-set :environment, ENV['RACK_ENV'].to_sym
+if ENV['RACK_ENV']
+  set :environment, ENV['RACK_ENV'].to_sym
+end
 set :root, root_dir
 set :app_file, "#{root_dir}/app.rb"
 set :raise_errors, true # disable when we're ready for production
