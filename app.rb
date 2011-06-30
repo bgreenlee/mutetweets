@@ -48,7 +48,8 @@ end
 get '/connect' do
   begin
     request_token = @client.request_token(
-      :oauth_callback => @@config['callback_url']
+      :oauth_callback => @@config['callback_url'],      
+      :x_auth_access_type => "write"
     )
   rescue Errno::ECONNRESET => e
     @error = "There was a problem connecting to Twitter. Please try again."
