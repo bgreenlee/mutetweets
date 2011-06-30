@@ -1,6 +1,7 @@
 GEM
   remote: http://rubygems.org/
   specs:
+    activesupport (3.0.6)
     addressable (2.2.6)
     data_objects (0.10.6)
       addressable (~> 2.1)
@@ -35,6 +36,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
+  activesupport
   dm-core (~> 1.1)
   dm-migrations (~> 1.1)
   dm-mysql-adapter (~> 1.1)

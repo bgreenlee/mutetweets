@@ -12,7 +12,7 @@ class User
   property :created_at, DateTime, :required => true, :index => true
   
   def registered?
-    !(access_token.empty? || secret_token.empty?)
+    !(access_token.blank? || secret_token.blank?)
   end
   
   def clear_tokens!
