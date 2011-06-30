@@ -1,8 +1,8 @@
 #!/usr/bin/env ruby
 ROOT_DIR = File.join(File.dirname(__FILE__), "..")
 $:.unshift "#{ROOT_DIR}/lib"
-$:.unshift "#{ROOT_DIR}/vendor/twitter_oauth/lib"
 
+require 'active_support'
 require 'logger'
 require 'optparse'
 require 'mutetweets/logger'
