@@ -3,6 +3,7 @@
   <title>Mute Tweets</title>
   <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
   <link href="/css/main.css" media="screen" rel="Stylesheet" type="text/css" />
+  <link type="text/plain" rel="author" href="/humans.txt" />
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/> 
 </head>
 
