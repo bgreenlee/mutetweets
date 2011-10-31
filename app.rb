@@ -1,7 +1,8 @@
 #!/usr/bin/env ruby
 require 'rack/logger'
 require 'helpers'
-require 'twitter_oauth'
+require 'oauth'
+require 'twitter'
 require 'mutetweets/models'
 require 'erubis'
 
@@ -9,7 +10,7 @@ configure do
   set :sessions, true
   @@config = YAML.load_file("config.yml") rescue nil || {}
   LOGGER = Logger.new("log/sinatra.log", development? ? ::Logger::DEBUG : ::Logger::INFO)
-  
+
   DataMapper.setup(:default, @@config['database'])
   DataMapper.auto_upgrade!
 end
@@ -23,13 +24,19 @@ before do
       reset_session
     end
   end
-  
-  @client = TwitterOAuth::Client.new(
+
+  @client ||= Twitter::Client.new(
     :consumer_key => @@config['consumer_key'],
     :consumer_secret => @@config['consumer_secret'],
-    :token => session[:access_token],
-    :secret => session[:secret_token]
-  )
+    :oauth_token => session[:access_token],
+    :oauth_token_secret => session[:secret_token])
+
+  @oauth_consumer ||= OAuth::Consumer.new(
+    @@config['consumer_key'],
+    @@config['consumer_secret'],
+    :site => 'http://api.twitter.com',
+    :request_endpoint => 'http://api.twitter.com',
+    :sign_in => true)
 end
 
 get '/' do
@@ -39,7 +46,7 @@ end
 # display the user's active mutes
 get '/mutes' do
   redirect '/' unless @user
-    
+
   @mutes = @user.mutes.active
   erubis :mutes
 end
@@ -47,53 +54,51 @@ end
 # store the request tokens and send to Twitter
 get '/connect' do
   begin
-    request_token = @client.request_token(
-      :oauth_callback => @@config['callback_url'],      
-      :x_auth_access_type => "write"
-    )
+    request_token = @oauth_consumer.get_request_token(
+      :oauth_callback => @@config['callback_url'],
+      :x_auth_access_type => "write")
   rescue Errno::ECONNRESET => e
     @error = "There was a problem connecting to Twitter. Please try again."
     redirect '/'
   end
-  
+
   session[:request_token] = request_token.token
   session[:request_token_secret] = request_token.secret
-  redirect request_token.authorize_url.gsub('authorize', 'authenticate') 
+  redirect request_token.authorize_url.gsub('authorize', 'authenticate')
 end
 
 # auth URL is called by twitter after the user has accepted the application
 # this is configured on the Twitter application settings page
 get '/auth' do
   # Exchange the request token for an access token.
-  
+
   begin
-    @access_token = @client.authorize(
-      session[:request_token],
-      session[:request_token_secret],
-      :oauth_verifier => params[:oauth_verifier]
-    )
+    request_token = OAuth::RequestToken.new(@oauth_consumer,
+                                            session['request_token'],
+                                            session['request_secret'])
+    access_token = request_token.get_access_token(:oauth_verifier => params[:oauth_verifier])
   rescue OAuth::Unauthorized, Errno::ECONNRESET => e
     @error = "There was a problem connecting to Twitter. Please try again."
     redirect '/'
   end
 
-  if @client.authorized? && @access_token
+  if @client.authorized? && access_token
       # find or create user
-      user_info = @client.info
+      user_info = @client.user
       user = User.first(:twitter_id => user_info['id']) ||
              User.create(:screen_name => user_info['screen_name'],
                          :twitter_id => user_info['id'],
-                         :access_token => @access_token.token,
-                         :secret_token => @access_token.secret)
+                         :access_token => access_token.token,
+                         :secret_token => access_token.secret)
 
       # update user tokens regardless, since they may have disconnected and reconnected
-      user.access_token = session[:access_token] = @access_token.token
-      user.secret_token = session[:secret_token] = @access_token.secret
+      user.access_token = session[:access_token] = access_token.token
+      user.secret_token = session[:secret_token] = access_token.secret
       user.save
-      
+
       session[:user] = user.id
   end
-  
+
   redirect '/'
 end
 
@@ -103,5 +108,5 @@ get '/disconnect' do
 end
 
 # for site monitoring
-get '/ping' do 
+get '/ping' do
 end
