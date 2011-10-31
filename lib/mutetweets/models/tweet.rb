@@ -1,3 +1,5 @@
+require 'time'
+
 # base class for mentions and direct messages
 class Tweet
   attr_reader :id, :created_at, :text, :muter, :mutee, :length, :direct_message, :verbose
