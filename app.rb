@@ -82,21 +82,23 @@ get '/auth' do
     redirect '/'
   end
 
-  if @client.authorized? && access_token
-      # find or create user
-      user_info = @client.user
-      user = User.first(:twitter_id => user_info['id']) ||
-             User.create(:screen_name => user_info['screen_name'],
-                         :twitter_id => user_info['id'],
-                         :access_token => access_token.token,
-                         :secret_token => access_token.secret)
+  begin
+    # find or create user
+    user_info = @client.verify_credentials
+    user = User.first(:twitter_id => user_info['id']) ||
+           User.create(:screen_name => user_info['screen_name'],
+                       :twitter_id => user_info['id'],
+                       :access_token => access_token.token,
+                       :secret_token => access_token.secret)
 
-      # update user tokens regardless, since they may have disconnected and reconnected
-      user.access_token = session[:access_token] = access_token.token
-      user.secret_token = session[:secret_token] = access_token.secret
-      user.save
+    # update user tokens regardless, since they may have disconnected and reconnected
+    user.access_token = session[:access_token] = access_token.token
+    user.secret_token = session[:secret_token] = access_token.secret
+    user.save
 
-      session[:user] = user.id
+    session[:user] = user.id
+  rescue Twitter::Unauthorized
+    # fall through to redirect
   end
 
   redirect '/'
