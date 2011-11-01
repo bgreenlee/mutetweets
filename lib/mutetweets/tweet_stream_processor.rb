@@ -1,7 +1,7 @@
 # require 'mutetweets/logger'
 module MuteTweets
   include Logger
-  
+
   class TweetStreamProcessor
     MAX_FETCH = 200 # max number of messages to fetch from Twitter
     MAX_RETRIES = 3 # number of times to retry in the case of an error
@@ -25,9 +25,9 @@ module MuteTweets
       process_refollows
       update_last_ids
     end
-  
+
     private
-  
+
     def process_mutes
       logger.debug "processing mutes..."
       mutes = get_mutes
@@ -43,12 +43,12 @@ module MuteTweets
           logger.warn "invalid time! skipping..."
           next
         end
-        
+
         if expires_at < Time.now
           logger.info "mute expired! skipping..."
           next
         end
-      
+
         user = User.first(:screen_name => mute.muter) || User.create(:screen_name => mute.muter)
         # make sure there isn't an active mute already
         if Mute.active_mute?(user, mute.mutee)
@@ -56,7 +56,7 @@ module MuteTweets
           next
         else
           # create the mute
-          Mute.create(:user => user, :screen_name => mute.mutee, :expires_at => expires_at, 
+          Mute.create(:user => user, :screen_name => mute.mutee, :expires_at => expires_at,
                       :direct_message => mute.direct_message, :verbose => mute.verbose)
           # if the user doesn't have tokens, send a message with a login link (only send it once, though)
           unless user.registered?
@@ -66,13 +66,13 @@ module MuteTweets
         end
       end
     end
-  
+
     def get_mutes
       mutes = get_mutes_from_mentions + get_mutes_from_direct_messages
       logger.info "valid mutes: #{mutes.length}" if mutes.any?
       return mutes
     end
-  
+
     def get_mutes_from_mentions
       # get mentions
       options = {:count => MAX_FETCH}
@@ -84,15 +84,15 @@ module MuteTweets
         logger.info "new mentions: #{mentions.length}"
         logger.debug "last mention id: #{@last_mention_id}"
       end
-    
+
       return mentions.select {|m| m.valid_mute? }
     end
-  
+
     def get_mutes_from_direct_messages
       # get direct mesages
       options = {:count => MAX_FETCH}
       options[:since_id] = @tweet_stream.last_direct_message_id unless @tweet_stream.last_direct_message_id.blank?
-      messages = @client.messages(options).map {|m| DirectMessage.new(m) }    
+      messages = @client.direct_messages(options).map {|m| DirectMessage.new(m) }
       if messages.any?
         @last_direct_message_id = messages.first.id
         logger.info "new direct messages: #{messages.length}"
@@ -100,14 +100,14 @@ module MuteTweets
       end
       return messages.select {|m| m.valid_mute? }
     end
-  
+
     def process_unfollows
       Mute.to_unfollow.each do |m|
         user = m.user
         next unless user.registered? # can't do anything if the user isn't registered
         logger.info "unfollowing #{m.screen_name} for #{user.screen_name}"
         user_client = @client.for_user(user)
-        response = user_client.unfriend(m.screen_name)
+        response = user_client.unfollow(m.screen_name)
         # if the user isn't friends with the mutee, or the mutee doesn't exist, delete the mute
         if response["error"]
           err_msg = response["error"]
@@ -119,7 +119,7 @@ module MuteTweets
             user.clear_tokens!
             @client.send_message(user, MESSAGE[:invalid_creds])
           else
-            msg = "error unfriending #{m.screen_name}: #{err_msg}"
+            msg = "error unfollowing #{m.screen_name}: #{err_msg}"
             m.retries += 1
             if m.retries > MAX_RETRIES
               logger.error "#{msg} (giving up)"
@@ -135,14 +135,14 @@ module MuteTweets
         end
       end
     end
-  
+
     def process_refollows
       Mute.to_refollow.each do |m|
         user = m.user
         next unless user.registered? # can't do anything if the user isn't registered
         logger.info "refollowing #{m.screen_name} for #{user.screen_name}"
         user_client = @client.for_user(user)
-        response = user_client.friend(m.screen_name)
+        response = user_client.follow(m.screen_name)
         if response["error"]
           err_msg = response["error"]
           case err_msg
@@ -171,7 +171,7 @@ module MuteTweets
         end
       end
     end
-  
+
     def update_last_ids
       @tweet_stream.last_mention_id = @last_mention_id if @last_mention_id
       @tweet_stream.last_direct_message_id = @last_direct_message_id if @last_direct_message_id

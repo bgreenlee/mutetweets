@@ -2,6 +2,7 @@ source "http://rubygems.org"
 
 gem "sinatra", "~>1.3.0"
 gem "activesupport", "~>2.3.0", :require => "active_support"
+gem "json"
 gem "oauth", "~>0.4"
 gem "twitter", "~>1.7"
 gem "dm-core", "~>1.2.0"
