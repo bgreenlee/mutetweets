@@ -2,3 +2,4 @@ config.yml
 tmp
 data
 log
+Gemfile.lock

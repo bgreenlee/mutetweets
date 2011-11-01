@@ -77,6 +77,8 @@ get '/auth' do
                                             session['request_token'],
                                             session['request_secret'])
     access_token = request_token.get_access_token(:oauth_verifier => params[:oauth_verifier])
+    @client.oauth_token = session[:access_token] = access_token.token
+    @client.oauth_token_secret = session[:secret_token] = access_token.secret
   rescue OAuth::Unauthorized, Errno::ECONNRESET => e
     @error = "There was a problem connecting to Twitter. Please try again."
     redirect '/'
@@ -92,12 +94,13 @@ get '/auth' do
                        :secret_token => access_token.secret)
 
     # update user tokens regardless, since they may have disconnected and reconnected
-    user.access_token = session[:access_token] = access_token.token
-    user.secret_token = session[:secret_token] = access_token.secret
+    user.access_token = session[:access_token]
+    user.secret_token = session[:secret_token]
     user.save
 
     session[:user] = user.id
-  rescue Twitter::Unauthorized
+  rescue Twitter::Unauthorized => e
+    LOGGER.error(e)
     # fall through to redirect
   end
 
