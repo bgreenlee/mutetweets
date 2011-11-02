@@ -13,6 +13,7 @@ module MuteTweets
     
     def set_log_output(io)
       @@logger = ::Logger.new(io)
+      @@logger.formatter = ::Logger::Formatter.new
       @@logger.datetime_format = "%Y-%m-%d %H:%M:%S"
       @@logger
     end
