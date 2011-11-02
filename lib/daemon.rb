@@ -57,6 +57,8 @@ rescue JSON::ParserError => e
   end
   
   logger.warn "twitter barfed: #{msg}"
+rescue Twitter::ServiceUnavailable => e
+  logger.warn "twitter barfed: #{e.message}"
 rescue Timeout::Error, Errno::ECONNRESET => e
   logger.warn "couldn't connect to twitter: #{e.message}"
 end
