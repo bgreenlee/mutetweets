@@ -2,7 +2,7 @@ module MuteTweets
   include Logger
 
   class Client < Twitter::Client
-    attr_reader :client, :cached_followfollower_ids
+    attr_reader :client, :cached_follower_ids
 
     # create a new client instance. If a user is provided, log in as that user.
     # Otherwise, log in as mutetweets
