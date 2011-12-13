@@ -141,33 +141,38 @@ module MuteTweets
         user = m.user
         next unless user.registered? # can't do anything if the user isn't registered
         logger.info "refollowing #{m.screen_name} for #{user.screen_name}"
-        user_client = @client.for_user(user)
-        response = user_client.follow(m.screen_name)
-        if response["error"]
-          err_msg = response["error"]
-          case err_msg
-          when /already on your list/i
-            # just ignore
-            logger.info "#{user.screen_name} was already following #{m.screen_name}"
-            m.expire!
-          when /Could not authenticate/i
-            user.clear_tokens!
-            @client.send_message(user, MESSAGE[:invalid_creds])
-          else
-            logger.error "error: #{err_msg}"
-            msg = "error friending #{m.screen_name}: #{err_msg}"
-            m.retries += 1
-            if m.retries > MAX_RETRIES
-              logger.error "#{msg} (giving up)"
-              m.error!(err_msg)
+        begin
+          user_client = @client.for_user(user)
+          response = user_client.follow(m.screen_name)
+          if response["error"]
+            err_msg = response["error"]
+            case err_msg
+            when /already on your list/i
+              # just ignore
+              logger.info "#{user.screen_name} was already following #{m.screen_name}"
+              m.expire!
+            when /Could not authenticate/i
+              user.clear_tokens!
+              @client.send_message(user, MESSAGE[:invalid_creds])
             else
-              logger.error "#{msg} (attempt ##{m.retries})"
-              m.save
+              logger.error "error: #{err_msg}"
+              msg = "error friending #{m.screen_name}: #{err_msg}"
+              m.retries += 1
+              if m.retries > MAX_RETRIES
+                logger.error "#{msg} (giving up)"
+                m.error!(err_msg)
+              else
+                logger.error "#{msg} (attempt ##{m.retries})"
+                m.save
+              end
             end
+          else
+            m.expire!
+            @client.send_message(user, "Unmuted #{m.screen_name}") if m.verbose?
           end
-        else
-          m.expire!
-          @client.send_message(user, "Unmuted #{m.screen_name}") if m.verbose?
+        rescue Twitter::Unauthorized
+          user.clear_tokens!
+          @client.send_message(user, MESSAGE[:invalid_creds])
         end
       end
     end
