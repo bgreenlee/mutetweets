@@ -108,14 +108,14 @@ module MuteTweets
         logger.info "unfollowing #{m.screen_name} for #{user.screen_name}"
         user_client = @client.for_user(user)
         begin
-          response = user_client.unfollow(m.screen_name)        
+          response = user_client.unfollow(m.screen_name)
           m.activate!
           @client.send_message(user, "Muted #{m.screen_name}") if m.verbose?
         rescue Twitter::NotFound => e
           m.error!(e.message)
         rescue Twitter::Unauthorized => e
           user.clear_tokens!
-          @client.send_message(user, MESSAGE[:invalid_creds])                  
+          @client.send_message(user, MESSAGE[:invalid_creds])
         end
       end
     end
@@ -127,7 +127,7 @@ module MuteTweets
         logger.info "refollowing #{m.screen_name} for #{user.screen_name}"
         user_client = @client.for_user(user)
         begin
-          response = user_client.follow(m.screen_name)          
+          response = user_client.follow(m.screen_name)
           if response["error"]
             err_msg = response["error"]
             case err_msg
@@ -152,8 +152,12 @@ module MuteTweets
             @client.send_message(user, "Unmuted #{m.screen_name}") if m.verbose?
           end
         rescue Twitter::Unauthorized => e
-            user.clear_tokens!
-            @client.send_message(user, MESSAGE[:invalid_creds])            
+          user.clear_tokens!
+          @client.send_message(user, MESSAGE[:invalid_creds])
+        rescue Twitter::Forbidden => e
+          # the user has blocked us (or the user). Ignore them.
+          logger.info "#{m.screen_name} seems to be blocking #{user.screen_name} (#{e.message})"
+          m.expire!
         end
       end
     end
