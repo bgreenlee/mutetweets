@@ -158,6 +158,9 @@ module MuteTweets
           # the user has blocked us (or the user). Ignore them.
           logger.info "#{m.screen_name} seems to be blocking #{user.screen_name} (#{e.message})"
           m.expire!
+        rescue Twitter::NotFound => e
+          logger.info "#{m.screen_name} or #{user.screen_name} seems to be gone? (#{e.message})"
+          m.expire!
         end
       end
     end
