@@ -67,7 +67,7 @@ module MuteTweets
                 if response["protected"] || response["error"] =~ /already requested to follow/
                   ProtectedAccount.create(:twitter_id => id)
                 end
-              rescue Twitter::Forbidden => e
+              rescue Twitter::Error::Forbidden => e
                 # chances are this is because the account we're trying to follow
                 # has been suspended. Just ignore it and it will eventually drop 
                 # out of our followers list
