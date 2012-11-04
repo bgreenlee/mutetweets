@@ -9,7 +9,12 @@ class Tweet
 
   def initialize(params)
     @id = params["id"]
-    @created_at = Time.parse(params["created_at"]) rescue $stderr.puts("invalid time: #{params['created_at']}") && nil
+    begin
+      @created_at = params["created_at"].kind_of?(Time) ? params["created_at"] : Time.parse(params["created_at"])
+    rescue Exception => e
+      $stderr.puts("invalid time: #{params['created_at']}\nError: #{e.message}")
+      @created_at = nil
+    end
     @text = params["text"]
     @mutee = nil
     @length = nil
