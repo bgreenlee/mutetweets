@@ -1,4 +1,5 @@
-# require 'mutetweets/logger'
+require 'twitter'
+
 module MuteTweets
   include Logger
 

@@ -5,13 +5,10 @@ $:.unshift "#{ROOT_DIR}/lib"
 require 'active_support'
 require 'logger'
 require 'optparse'
-require 'mutetweets/logger'
 require 'rubygems'
 require 'json'
 require 'twitter'
-require 'mutetweets/models'
-require 'mutetweets/client'
-require 'mutetweets/tweet_stream_processor'
+require 'mutetweets'
 
 include MuteTweets::Logger
 

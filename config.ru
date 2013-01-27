@@ -1,5 +1,6 @@
 #!/usr/bin/env ruby
 root_dir = File.dirname(__FILE__)
+$:.unshift "#{root_dir}"
 $:.unshift "#{root_dir}/lib"
 
 require 'rubygems'
