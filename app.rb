@@ -99,7 +99,7 @@ get '/auth' do
     user.save
 
     session[:user] = user.id
-  rescue Twitter::Unauthorized => e
+  rescue Twitter::Error::Unauthorized => e
     LOGGER.error(e)
     # fall through to redirect
   end
