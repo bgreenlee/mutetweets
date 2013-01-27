@@ -88,9 +88,9 @@ get '/auth' do
   begin
     # find or create user
     user_info = @client.verify_credentials
-    user = User.first(:twitter_id => user_info['id']) ||
+    user = User.first(:twitter_id => user_info['id_str']) ||
            User.create(:screen_name => user_info['screen_name'],
-                       :twitter_id => user_info['id'],
+                       :twitter_id => user_info['id_str'],
                        :access_token => access_token.token,
                        :secret_token => access_token.secret)
 

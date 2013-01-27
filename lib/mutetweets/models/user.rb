@@ -5,7 +5,7 @@ class User
   
   property :id, Serial
   property :screen_name, String, :required => true, :unique_index => true
-  property :twitter_id, Integer
+  property :twitter_id, String, :length => 20
   property :access_token, String, :length => 64  # tokens can be null if the user sends a mute but hasn't registered yet
   property :secret_token, String, :length => 64
   property :welcome_sent, Boolean, :default => false
