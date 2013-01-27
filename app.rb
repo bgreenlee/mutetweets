@@ -13,6 +13,7 @@ configure do
 
   DataMapper.setup(:default, @@config['database'])
   DataMapper.auto_upgrade!
+  DataMapper.finalize
 end
 
 before do

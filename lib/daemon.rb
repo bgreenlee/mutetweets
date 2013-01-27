@@ -40,6 +40,7 @@ config = YAML.load_file(File.join(ROOT_DIR, "config.yml")) rescue nil || {}
 # set up the db
 DataMapper.setup(:default, config['database'])
 DataMapper.auto_upgrade!
+DataMapper.finalize
 
 # create twitter client
 client = MuteTweets::Client.new(config)
