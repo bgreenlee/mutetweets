@@ -17,7 +17,9 @@ configure do
 end
 
 before do
+  # don't bother setting up the session for pings
   next if request.path_info =~ /ping$/
+
   if session[:user]
     if @user = User.get(session[:user])
       @num_mutes = @user.mutes.active.count
