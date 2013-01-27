@@ -1,3 +1,5 @@
+require 'twitter'
+
 module MuteTweets
   include Logger
 
@@ -33,9 +35,9 @@ module MuteTweets
 
       # process followers
       # we need to sync our followers and friends--friending people who are following us and unfriending people who are no longer following us
-      followers = follower_ids.ids
+      followers = follower_ids.to_a
       logger.debug "followers: #{followers.length}"
-      friends = friend_ids.ids
+      friends = friend_ids.to_a
       logger.debug "friends: #{friends.length}"
       if followers.is_a?(Array) && friends.is_a?(Array)
         if followers.empty?
@@ -47,33 +49,12 @@ module MuteTweets
         else
           to_follow = followers - friends
           to_unfollow = friends - followers
-
-          to_unfollow.each do |id|
-            unfollow(id)
-            # remove any protected accounts we're unfriending, so if they
-            # happen to friend us again, we'll pick them up
-            if protected_account = ProtectedAccount.first(:twitter_id => id)
-              protected_account.destroy
-            end
-          end
+          unfollow(to_unfollow)
           logger.info "unfollowed #{to_unfollow.length} (#{to_unfollow.join(', ')})" if to_unfollow.any?
           if to_follow.any?
-            # keep track of protected accounts so we don't keep trying to follow them
-            protected_account_ids = ProtectedAccount.all.map(&:twitter_id)
-            to_follow = to_follow - protected_account_ids
-            to_follow.each do |id|
-              begin
-                response = follow(id)
-                if response["protected"] || response["error"] =~ /already requested to follow/
-                  ProtectedAccount.create(:twitter_id => id)
-                end
-              rescue Twitter::Error::Forbidden => e
-                # chances are this is because the account we're trying to follow
-                # has been suspended. Just ignore it and it will eventually drop 
-                # out of our followers list
-                logger.warn "#{e} trying to follow account id ##{id}"
-              end
-            end
+            # remove our pending follow requests, so we don't try to re-follow
+            to_follow -= friendships_outgoing.to_a
+            follow(to_follow)
           end
 
           @cached_follower_ids = followers
