@@ -109,9 +109,13 @@ module MuteTweets
         logger.info "unfollowing #{m.screen_name} for #{user.screen_name}"
         user_client = @client.for_user(user)
         begin
-          response = user_client.unfollow(m.screen_name)
-          m.activate!
-          @client.send_message(user, "Muted #{m.screen_name}") if m.verbose?
+          unfollowed = user_client.unfollow(m.screen_name)
+          if unfollowed.any?
+            m.activate!
+            @client.send_message(user, "Muted #{m.screen_name}") if m.verbose?
+          else
+            logger.error "could not unfollow #{m.screen_name}"
+          end
         rescue Twitter::Error::NotFound => e
           m.error!(e.message)
         rescue Twitter::Error::Unauthorized => e
@@ -128,29 +132,20 @@ module MuteTweets
         logger.info "refollowing #{m.screen_name} for #{user.screen_name}"
         user_client = @client.for_user(user)
         begin
-          response = user_client.follow(m.screen_name)
-          if response["error"]
-            err_msg = response["error"]
-            case err_msg
-            when /already on your list/i
-              # just ignore
-              logger.info "#{user.screen_name} was already following #{m.screen_name}"
-              m.expire!
-            else
-              logger.error "error: #{err_msg}"
-              msg = "error friending #{m.screen_name}: #{err_msg}"
-              m.retries += 1
-              if m.retries > MAX_RETRIES
-                logger.error "#{msg} (giving up)"
-                m.error!(err_msg)
-              else
-                logger.error "#{msg} (attempt ##{m.retries})"
-                m.save
-              end
-            end
-          else
+          followed = user_client.follow(m.screen_name)
+          if followed.any?
             m.expire!
             @client.send_message(user, "Unmuted #{m.screen_name}") if m.verbose?
+          else
+            msg = "could not friend #{m.screen_name}"
+            m.retries += 1
+            if m.retries > MAX_RETRIES
+              logger.error "#{msg} (giving up)"
+              m.error!("max retries reached")
+            else
+              logger.error "#{msg} (attempt ##{m.retries})"
+              m.save
+            end
           end
         rescue Twitter::Error::Unauthorized => e
           user.clear_tokens!
