@@ -71,6 +71,8 @@ module MuteTweets
 
     # message the user; if they're a follower, send a DM; otherwise, a public message
     def send_message(user, message)
+      # append the time to the message so twitter doesn't complain to us about duplicate statuses
+      message += " (at #{Time.now})"
       if is_follower?(user)
         logger.info "sending direct message to #{user.screen_name}: #{message}"
         response = direct_message_create(user.screen_name, message)
