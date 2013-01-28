@@ -7,7 +7,11 @@
 <% @mutes.each_with_index do |mute, i| -%>
 <tr class="<%= i % 2 == 0 ? 'even' : 'odd' %>">
   <td><a href="http://twitter.com/<%= mute.screen_name %>"><%= mute.screen_name %></a></td>
-  <td><%= mute.expires_at.strftime("%a %b %d, %Y at %I:%S%p") %></td>
+  <td>
+  	<%= mute.expires_at.strftime("%a %b %d, %Y at %I:%S%P %Z") %>
+  	(<%= mute.expires_at.in_time_zone('Eastern Time (US & Canada)').strftime("%I:%S%P %Z") %>,
+  	 <%= mute.expires_at.in_time_zone('Pacific Time (US & Canada)').strftime("%I:%S%P %Z") %>)
+  </td>
 </tr>
 <% end -%>
 </table>

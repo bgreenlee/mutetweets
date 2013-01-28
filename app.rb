@@ -5,6 +5,7 @@ require 'oauth'
 require 'twitter'
 require 'mutetweets/models'
 require 'erubis'
+require 'active_support/all'
 
 configure do
   set :sessions, true
