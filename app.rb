@@ -43,7 +43,7 @@ before do
 end
 
 get '/' do
-  erubis :home
+  erb :home
 end
 
 # display the user's active mutes
@@ -51,7 +51,7 @@ get '/mutes' do
   redirect '/' unless @user
 
   @mutes = @user.mutes.active
-  erubis :mutes
+  erb :mutes
 end
 
 # store the request tokens and send to Twitter
