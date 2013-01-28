@@ -66,7 +66,7 @@ module MuteTweets
 
     def is_follower?(user)
       @cached_follower_ids ||= follower_ids.to_a
-      @cached_follower_ids.include?(user.twitter_id)
+      @cached_follower_ids.include?(user.twitter_id.to_i)  # FIXME: this will need to be changed when follower_ids returns strings, as it should
     end
 
     # message the user; if they're a follower, send a DM; otherwise, a public message
