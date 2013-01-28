@@ -2,7 +2,7 @@
 ROOT_DIR = File.join(File.dirname(__FILE__), "..")
 $:.unshift "#{ROOT_DIR}/lib"
 
-require 'active_support'
+require 'active_support/core_ext/string'
 require 'logger'
 require 'optparse'
 require 'rubygems'
