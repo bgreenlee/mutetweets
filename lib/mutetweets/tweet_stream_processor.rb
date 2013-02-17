@@ -40,6 +40,9 @@ module MuteTweets
 
         begin
           expires_at = mute.created_at + mute.length
+          if expires_at > Mute::MAX_EXPIRES_AT
+            expires_at = Mute::MAX_EXPIRES_AT
+          end
         rescue RangeError
           logger.warn "invalid time! skipping..."
           next
