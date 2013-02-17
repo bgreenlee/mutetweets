@@ -1,8 +1,8 @@
 # table representing muting actions
 class Mute
   include DataMapper::Resource
-  MAX_EXPIRES_AT = DateTime.new(9999,12,31,23,59,59)
-  
+  MAX_EXPIRES_AT = Time.new(9999,12,31,23,59,59)
+
   belongs_to :user
   
   property :id, Serial
