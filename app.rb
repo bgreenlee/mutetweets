@@ -30,7 +30,7 @@ before do
     end
   end
 
-  @client ||= Twitter::Client.new(
+  @client ||= Twitter::REST::Client.new(
     :consumer_key => @@config['consumer_key'],
     :consumer_secret => @@config['consumer_secret'],
     :access_token => session[:access_token],
@@ -39,8 +39,8 @@ before do
   @oauth_consumer ||= OAuth::Consumer.new(
     @@config['consumer_key'],
     @@config['consumer_secret'],
-    :site => 'http://api.twitter.com',
-    :request_endpoint => 'http://api.twitter.com',
+    :site => 'https://api.twitter.com',
+    :request_endpoint => 'https://api.twitter.com',
     :sign_in => true)
 end
 
