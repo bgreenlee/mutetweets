@@ -57,7 +57,6 @@ rescue JSON::ParserError => e
 rescue Twitter::Error::TooManyRequests,
        Twitter::Error::ServiceUnavailable,
        Twitter::Error::BadGateway,
-       Twitter::Error::ClientError,
        Timeout::Error,
        Errno::ECONNRESET,
        Errno::ETIMEDOUT  => e
