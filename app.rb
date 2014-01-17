@@ -33,8 +33,8 @@ before do
   @client ||= Twitter::Client.new(
     :consumer_key => @@config['consumer_key'],
     :consumer_secret => @@config['consumer_secret'],
-    :oauth_token => session[:access_token],
-    :oauth_token_secret => session[:secret_token])
+    :access_token => session[:access_token],
+    :access_token_secret => session[:secret_token])
 
   @oauth_consumer ||= OAuth::Consumer.new(
     @@config['consumer_key'],
@@ -82,8 +82,8 @@ get '/auth' do
                                             session['request_token'],
                                             session['request_secret'])
     access_token = request_token.get_access_token(:oauth_verifier => params[:oauth_verifier])
-    @client.oauth_token = session[:access_token] = access_token.token
-    @client.oauth_token_secret = session[:secret_token] = access_token.secret
+    @client.access_token = session[:access_token] = access_token.token
+    @client.access_token_secret = session[:secret_token] = access_token.secret
   rescue OAuth::Unauthorized, Errno::ECONNRESET => e
     @error = "There was a problem connecting to Twitter. Please try again."
     redirect '/'

@@ -15,8 +15,8 @@ module MuteTweets
       options = {
         :consumer_key => config['consumer_key'],
         :consumer_secret => config['consumer_secret'],
-        :oauth_token => user ? user.access_token : config['client_access_token'],
-        :oauth_token_secret => user ? user.secret_token : config['client_secret_token']
+        :access_token => user ? user.access_token : config['client_access_token'],
+        :access_token_secret => user ? user.secret_token : config['client_secret_token']
       }
 
       super(options)
