@@ -1,6 +1,6 @@
 source "http://rubygems.org"
 
-gem "sinatra", "~>1.3.0"
+gem "sinatra", "~>1.4.0"
 gem "activesupport", "~> 3.2.11"
 gem "json", "~> 1.8.1"
 gem "faraday", "~> 0.9.0"

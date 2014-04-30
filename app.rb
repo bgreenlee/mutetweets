@@ -10,10 +10,10 @@ require 'active_support/all'
 
 configure do
   set :sessions, true
-  @@config = YAML.load_file("config.yml") rescue nil || {}
+  set :config, YAML.load_file("config.yml") rescue nil || {}
   LOGGER = Logger.new("log/sinatra.log", development? ? ::Logger::DEBUG : ::Logger::INFO)
 
-  DataMapper.setup(:default, @@config['database'])
+  DataMapper.setup(:default, settings.config['database'])
   DataMapper.auto_upgrade!
   DataMapper.finalize
 end
@@ -30,15 +30,18 @@ before do
     end
   end
 
+  consumer_key = settings.config['consumer_key']
+  consumer_secret = settings.config['consumer_secret']
+
   @client ||= Twitter::REST::Client.new(
-    :consumer_key => @@config['consumer_key'],
-    :consumer_secret => @@config['consumer_secret'],
+    :consumer_key => consumer_key,
+    :consumer_secret => consumer_secret,
     :access_token => session[:access_token],
     :access_token_secret => session[:secret_token])
 
   @oauth_consumer ||= OAuth::Consumer.new(
-    @@config['consumer_key'],
-    @@config['consumer_secret'],
+    consumer_key,
+    consumer_secret,
     :site => 'https://api.twitter.com',
     :request_endpoint => 'https://api.twitter.com',
     :sign_in => true)
@@ -60,7 +63,7 @@ end
 get '/connect' do
   begin
     request_token = @oauth_consumer.get_request_token(
-      :oauth_callback => @@config['callback_url'],
+      :oauth_callback => settings.config['callback_url'],
       :x_auth_access_type => "write")
   rescue Errno::ECONNRESET => e
     @error = "There was a problem connecting to Twitter. Please try again."

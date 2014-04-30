@@ -8,11 +8,12 @@ require 'sinatra'
 require 'app'
 
 if ENV['RACK_ENV']
-  set :environment, ENV['RACK_ENV'].to_sym
+  set :environment, (ENV['RACK_ENV'].to_sym || :production)
 end
 set :root, root_dir
 set :app_file, "#{root_dir}/app.rb"
-set :raise_errors, true # disable when we're ready for production
+set :raise_errors, false
+set :show_exceptions, false
 disable :run
 
 log = File.new("#{root_dir}/log/sinatra.log", "a+")
