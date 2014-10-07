@@ -1,10 +1,10 @@
 class DirectMessage < Tweet
   def initialize(params)
-    @muter = params["sender"]["screen_name"]
+    @muter = params.sender.screen_name
     super
     parse!
   end
-  
+
   # parse the tweet for a valid mute
   def parse!
     if m = /^\s*@?(\w+)\s+(?:for)?\s*(\d+)(m|h|d)(?:\s+-(v|verbose)\b)?/i.match(@text)
