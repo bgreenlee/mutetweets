@@ -80,7 +80,7 @@ module MuteTweets
         logger.info "sending public message to #{user.screen_name}: #{message}"
         response = update("@#{user.screen_name} #{message}")
       end
-      if response['error']
+      if response.error
         logger.error "error sending message: #{response['error']}"
       end
     end
