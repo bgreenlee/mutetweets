@@ -73,15 +73,16 @@ module MuteTweets
     def send_message(user, message)
       # append the time to the message so twitter doesn't complain to us about duplicate statuses
       message += " (at #{Time.now})"
-      if is_follower?(user)
-        logger.info "sending direct message to #{user.screen_name}: #{message}"
-        response = direct_message_create(user.screen_name, message)
-      else
-        logger.info "sending public message to #{user.screen_name}: #{message}"
-        response = update("@#{user.screen_name} #{message}")
-      end
-      if response.error
-        logger.error "error sending message: #{response['error']}"
+      begin
+        if is_follower?(user)
+          logger.info "sending direct message to #{user.screen_name}: #{message}"
+          response = direct_message_create(user.screen_name, message)
+        else
+          logger.info "sending public message to #{user.screen_name}: #{message}"
+          response = update("@#{user.screen_name} #{message}")
+        end
+      rescue Twitter::Error => e
+        logger.error "error sending message: #{e.message}"
       end
     end
   end
